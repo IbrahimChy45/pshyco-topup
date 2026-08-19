@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -42,7 +42,6 @@
         #notification-banner { display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background-color: #3b82f6; color: white; padding: 15px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 9999; text-align: center; font-weight: bold; font-size: 14px; animation: slideDown 0.5s ease-out forwards; cursor: pointer; border: 2px solid #60a5fa; }
         @keyframes slideDown { 0% { top: -50px; opacity: 0; } 100% { top: 20px; opacity: 1; } }
 
-        /* 👇 User Info Card CSS (আপনার ছবিতে এই ডিজাইনটি আসেনি) 👇 */
         .user-card { display: flex; align-items: center; gap: 12px; background: rgba(15, 23, 42, 0.8); padding: 12px; border-radius: 10px; border: 1px solid #3b82f6; margin-bottom: 15px; box-shadow: inset 0 0 10px rgba(59,130,246,0.1); }
         .user-card img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid #3b82f6; object-fit: cover; background: #0b0f19; }
         .user-card div { display: flex; flex-direction: column; gap: 3px; }
@@ -81,8 +80,9 @@
         
         <div class="admin-section">
             <h3 class="section-title"><i class="fa-solid fa-coins" style="color: #10b981;"></i> Manage User Balance</h3>
-            <p style="font-size: 11px; color: #94a3b8; margin-top:-5px; margin-bottom: 12px;">ইউজারের জিমেইল দিয়ে সরাসরি তার অ্যাকাউন্টে ব্যালেন্স অ্যাড করুন।</p>
-            <input type="email" id="user-email" class="input-dark" placeholder="User Email (e.g. abcd@gmail.com)">
+            <!-- 👇 লেখা ও ইনপুট টাইপ আপডেট করা হয়েছে 👇 -->
+            <p style="font-size: 11px; color: #94a3b8; margin-top:-5px; margin-bottom: 12px;">ইউজারের জিমেইল, ফোন নাম্বার বা UID দিয়ে সরাসরি ব্যালেন্স অ্যাড করুন।</p>
+            <input type="text" id="user-email" class="input-dark" placeholder="Email, Phone Number or UID">
             <input type="number" id="add-amount" class="input-dark" placeholder="Amount (৳)">
             <button id="direct-add-btn" class="submit-btn" style="background-color: #3b82f6;">+ Add Balance</button>
         </div>
@@ -216,11 +216,10 @@
         onAuthStateChanged(auth, (user) => { if (user) fetchAdminData(); else window.location.href = "login.html"; });
 
         function fetchAdminData() {
-            let usersData = {}; // সব ইউজারের ডেটা এখানে সেভ থাকবে
+            let usersData = {}; 
             let ordersSnap = null;
             let requestsSnap = null;
 
-            // গেম অর্ডার রেন্ডার করার ফাংশন
             const renderOrders = (snapshot) => {
                 let container = document.getElementById('game-order-list');
                 let html = ''; let orders = []; let totalOrders = 0, pendingCount = 0, revenue = 0;
@@ -238,8 +237,7 @@
                     document.getElementById('stat-revenue').innerText = "৳ " + revenue;
                     
                     orders.reverse().forEach(order => {
-                        // 👇 ইউজারের তথ্য ফেচ করা 👇
-                        let uId = order.uid || ""; // নতুন অর্ডারে uid থাকবে
+                        let uId = order.uid || ""; 
                         let uName = usersData[uId]?.name || "Guest User";
                         let uEmail = usersData[uId]?.email || order.userPhone || "No Email Given";
                         let uPic = usersData[uId]?.profilePic || "https://via.placeholder.com/45/3b82f6/ffffff?text=U";
@@ -249,7 +247,6 @@
                         
                         html += `
                         <div style="margin-bottom:15px; padding:15px; background:#151b29; border:1px solid #2a3449; border-radius:8px;">
-                            <!-- User Profile Card -->
                             <div class="user-card">
                                 <img src="${uPic}" alt="dp">
                                 <div><b>${uName}</b><span>${uEmail}</span></div>
@@ -272,7 +269,6 @@
                 }
             };
 
-            // অ্যাড মানি রিকোয়েস্ট রেন্ডার করার ফাংশন
             const renderRequests = (snapshot) => {
                 let container = document.getElementById('add-money-list');
                 let html = ''; let requests = [];
@@ -280,7 +276,6 @@
                 if (snapshot.exists()) {
                     snapshot.forEach(child => { requests.push({ id: child.key, ...child.val() }); });
                     requests.reverse().forEach(req => {
-                        // 👇 ইউজারের তথ্য ফেচ করা 👇
                         let uId = req.uid || "";
                         let uName = usersData[uId]?.name || "Guest User";
                         let uEmail = usersData[uId]?.email || req.userPhone || "No Email Given";
@@ -291,7 +286,6 @@
                         
                         html += `
                         <div style="margin-bottom:15px; padding:15px; background:#151b29; border:1px solid #2a3449; border-radius:8px;">
-                            <!-- User Profile Card -->
                             <div class="user-card" style="border-color: rgba(16, 185, 129, 0.4);">
                                 <img src="${uPic}" style="border-color: #10b981;" alt="dp">
                                 <div><b>${uName}</b><span>${uEmail}</span></div>
@@ -312,27 +306,22 @@
                 }
             };
 
-            // ১. সব ইউজারের ডেটা লোড
             onValue(ref(db, 'users'), (snap) => {
                 if(snap.exists()) {
                     usersData = snap.val();
-                    // ইউজার ডেটা পাওয়ার পর অর্ডার রি-রেন্ডার করবে
                     if(ordersSnap) renderOrders(ordersSnap);
                     if(requestsSnap) renderRequests(requestsSnap);
                 }
             });
 
-            // ২. অর্ডার এবং রিকোয়েস্ট লোড
             onValue(ref(db, 'orders'), (snap) => { ordersSnap = snap; renderOrders(snap); });
             onValue(ref(db, 'add_money_requests'), (snap) => { requestsSnap = snap; renderRequests(snap); });
 
-            // রিয়েল-টাইম সাউন্ড ও নোটিফিকেশন লজিক
             let isInitialLoad = true; setTimeout(() => { isInitialLoad = false; }, 2000); 
             onChildAdded(ref(db, 'orders'), (snapshot) => { if(!isInitialLoad) { showNotification("🎮 নতুন গেম অর্ডার এসেছে! চেক করুন।"); } });
             onChildAdded(ref(db, 'add_money_requests'), (snapshot) => { if(!isInitialLoad) { showNotification("💰 নতুন অ্যাড মানি রিকোয়েস্ট এসেছে! চেক করুন।"); } });
             function showNotification(message) { const banner = document.getElementById('notification-banner'); document.getElementById('noti-text').innerText = message; banner.style.display = 'block'; try { let audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3'); audio.play(); } catch(e) {} setTimeout(() => { banner.style.display = 'none'; }, 5000); }
 
-            // Dynamic Categories & Packages
             onValue(ref(db, 'homepage_categories'), (snapshot) => {
                 let catContainer = document.getElementById('admin-category-list'); let selectDropdown = document.getElementById('new-pkg-game'); let listsContainer = document.getElementById('dynamic-package-lists'); let catHtml = ''; let selectHtml = ''; let listsHtml = ''; let gameKeys = []; 
                 if (snapshot.exists()) {
@@ -349,20 +338,68 @@
                 } else { catContainer.innerHTML = '<div class="empty-msg">No games on Homepage!</div>'; selectDropdown.innerHTML = '<option value="">No games available</option>'; listsContainer.innerHTML = '<div class="empty-msg">Add a game first</div>'; }
             });
 
-            // Settings
             onValue(ref(db, 'hot_offers'), (snapshot) => { let container = document.getElementById('admin-offer-list'); let html = ''; if (snapshot.exists()) { snapshot.forEach(child => { let offer = child.val(); html += `<div style="background: #151b29; padding: 12px; border: 1px solid #2a3449; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;"><div style="display:flex; align-items:center; gap: 10px;"><img src="${offer.image}" style="width: 30px; height: 30px; border-radius:5px; object-fit:cover;"><div><b style="color: white; font-size: 13px;">${offer.title}</b><div style="color: #ef4444; font-size: 10px;">৳${offer.newPrice}</div></div></div><button onclick="window.deleteItem('hot_offers', '${child.key}')" style="background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">Delete</button></div>`; }); container.innerHTML = html; } else { container.innerHTML = '<div class="empty-msg">No active offers!</div>'; } });
             onValue(ref(db, 'settings/payment_numbers'), (snapshot) => { if (snapshot.exists()) { const data = snapshot.val(); document.getElementById('admin-bkash').value = data.bkash || ""; document.getElementById('admin-nagad').value = data.nagad || ""; } });
             onValue(ref(db, 'settings/ui_settings'), (snapshot) => { if (snapshot.exists()) { const data = snapshot.val(); document.getElementById('admin-banner1').value = data.banner1 || ""; document.getElementById('admin-banner2').value = data.banner2 || ""; document.getElementById('admin-banner3').value = data.banner3 || ""; document.getElementById('admin-warning-img').value = data.warningImg || ""; document.getElementById('admin-warning-text').value = data.warningText || ""; } });
             onValue(ref(db, 'settings/support_info'), (snapshot) => { if (snapshot.exists()) { const data = snapshot.val(); document.getElementById('admin-whatsapp').value = data.whatsapp || ""; document.getElementById('admin-telegram').value = data.telegram || ""; } });
         }
 
-        // Actions
         window.updateStatus = async (path, id, newStatus) => { if(confirm(`Mark as ${newStatus}?`)) await update(ref(db, `${path}/${id}`), { status: newStatus }); }
         window.deleteItem = async (path, key) => { if(confirm("Are you sure you want to delete this?")) await remove(ref(db, `${path}/${key}`)); }
         window.approveMoney = async (reqId, uid, amount) => { if(confirm(`Approve adding ৳${amount}?`)) { await update(ref(db, `add_money_requests/${reqId}`), { status: 'Completed' }); const snap = await get(ref(db, `users/${uid}`)); let currentBal = (snap.exists() && snap.val().balance) ? Number(snap.val().balance) : 0; await update(ref(db, `users/${uid}`), { balance: currentBal + Number(amount) }); alert("Successfully added balance!"); } }
         window.resetAllData = async () => { if(confirm("সতর্কতা! সমস্ত রেকর্ড মুছে ফেলতে চান?")) { try { await remove(ref(db, 'orders')); await remove(ref(db, 'add_money_requests')); alert("রেকর্ড মুছে ফেলা হয়েছে!"); document.getElementById('stat-total-orders').innerText = "0"; document.getElementById('stat-pending').innerText = "0"; document.getElementById('stat-revenue').innerText = "৳ 0"; } catch (e) { alert("Error: " + e.message); } } };
 
-        document.getElementById('direct-add-btn').addEventListener('click', async () => { let email = document.getElementById('user-email').value.trim().toLowerCase(); let amount = Number(document.getElementById('add-amount').value); if(!email || amount <= 0) return alert("সঠিক জিমেইল এবং অ্যামাউন্ট দিন!"); let btn = document.getElementById('direct-add-btn'); btn.innerText = "Searching..."; btn.disabled = true; let foundUid = null; const usersSnap = await get(ref(db, 'users')); if(usersSnap.exists()) { usersSnap.forEach(child => { let userData = child.val(); if(userData.email && userData.email.toLowerCase() === email) foundUid = child.key; }); } if(foundUid) { const balRef = ref(db, `users/${foundUid}/balance`); const snap = await get(balRef); let currentBal = snap.exists() ? Number(snap.val()) : 0; await set(balRef, currentBal + amount); alert(`সাফল্য! ${email} তে ৳${amount} অ্যাড করা হয়েছে।`); document.getElementById('user-email').value = ""; document.getElementById('add-amount').value = ""; } else { alert("অ্যাকাউন্ট পাওয়া যায়নি!"); } btn.innerText = "+ Add Balance"; btn.disabled = false; });
+        // 👇 ব্যালেন্স অ্যাড করার আপডেট লজিক 👇
+        document.getElementById('direct-add-btn').addEventListener('click', async () => { 
+            let searchVal = document.getElementById('user-email').value.trim(); 
+            let searchLower = searchVal.toLowerCase();
+            let amount = Number(document.getElementById('add-amount').value); 
+            
+            if(!searchVal || amount <= 0) {
+                return alert("⚠️ সঠিক জিমেইল, ফোন নাম্বার অথবা UID দিন এবং অ্যামাউন্ট লিখুন!"); 
+            }
+            
+            let btn = document.getElementById('direct-add-btn'); 
+            btn.innerText = "Searching..."; 
+            btn.disabled = true; 
+            
+            let foundUid = null; 
+            const usersSnap = await get(ref(db, 'users')); 
+            
+            if(usersSnap.exists()) { 
+                // ১. প্রথমে সরাসরি UID দিয়ে চেক করবে
+                if (usersSnap.hasChild(searchVal)) {
+                    foundUid = searchVal;
+                } else {
+                    // ২. UID না পেলে জিমেইল বা ফোন নাম্বার দিয়ে খুঁজবে
+                    usersSnap.forEach(child => { 
+                        let userData = child.val(); 
+                        let dbEmail = userData.email ? userData.email.toLowerCase() : "";
+                        let dbPhone = userData.phone ? String(userData.phone) : "";
+                        
+                        if(dbEmail === searchLower || dbPhone === searchVal) {
+                            foundUid = child.key; 
+                        }
+                    }); 
+                }
+            } 
+            
+            if(foundUid) { 
+                const balRef = ref(db, `users/${foundUid}/balance`); 
+                const snap = await get(balRef); 
+                let currentBal = snap.exists() ? Number(snap.val()) : 0; 
+                await set(balRef, currentBal + amount); 
+                alert(`✅ সাফল্য! অ্যাকাউন্টে ৳${amount} অ্যাড করা হয়েছে।`); 
+                document.getElementById('user-email').value = ""; 
+                document.getElementById('add-amount').value = ""; 
+            } else { 
+                alert("❌ অ্যাকাউন্ট পাওয়া যায়নি! জিমেইল, ফোন বা UID সঠিক কি না চেক করুন।"); 
+            } 
+            
+            btn.innerText = "+ Add Balance"; 
+            btn.disabled = false; 
+        });
+
         document.getElementById('add-pkg-btn').addEventListener('click', async () => { let gameNode = document.getElementById('new-pkg-game').value; if(!gameNode) return alert("Please add a game first!"); let diamond = document.getElementById('new-pkg-diamond').value.trim(); let name = document.getElementById('new-pkg-type').value.trim(); let price = Number(document.getElementById('new-pkg-price').value); if(!diamond || !name || price <= 0) return alert("Fill all fields!"); let btn = document.getElementById('add-pkg-btn'); btn.innerText = "Adding..."; let keyName = diamond.replace(/\s+/g, '_').toLowerCase() + '_' + Date.now(); await set(ref(db, `${gameNode}/pkg_${keyName}`), { diamond, name, price }); alert("Package Added!"); document.getElementById('new-pkg-diamond').value = ""; document.getElementById('new-pkg-type').value = ""; document.getElementById('new-pkg-price').value = ""; btn.innerText = "+ Add Package"; });
         document.getElementById('add-cat-btn').addEventListener('click', async () => { let title = document.getElementById('cat-title').value.trim(); let subtitle = document.getElementById('cat-subtitle').value.trim(); let image = document.getElementById('cat-image').value.trim(); let link = document.getElementById('cat-link').value.trim(); if(!title || !image || !link) return alert("Fill all fields!"); await set(push(ref(db, 'homepage_categories')), { title, subtitle: subtitle || title, image, link }); alert("Game Added!"); document.getElementById('cat-title').value=""; document.getElementById('cat-subtitle').value=""; document.getElementById('cat-image').value=""; document.getElementById('cat-link').value=""; });
         document.getElementById('update-numbers-btn').addEventListener('click', async () => { let bkash = document.getElementById('admin-bkash').value.trim(); let nagad = document.getElementById('admin-nagad').value.trim(); await set(ref(db, 'settings/payment_numbers'), { bkash, nagad }); alert("Updated!"); });
