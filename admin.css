@@ -1,0 +1,202 @@
+/* Base Setup */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: #0b0e14;
+    color: #ffffff;
+}
+
+/* Header */
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: #151a23;
+    border-bottom: 1px solid #1f2937;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo {
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.logo span {
+    color: #3b82f6;
+    margin-left: 5px;
+}
+
+.logout-btn {
+    font-size: 12px;
+    color: #ef4444;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* Container */
+.admin-container {
+    padding: 15px 20px;
+}
+
+/* Dashboard Stats */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.stat-card {
+    background-color: #151a23;
+    border: 1px solid #1f2937;
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+}
+
+.stat-info h3 {
+    font-size: 18px;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.stat-info p {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+/* Section Title */
+.section-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #94a3b8;
+    margin-bottom: 15px;
+    letter-spacing: 1px;
+}
+
+/* Order Cards */
+.order-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.order-card {
+    background-color: #151a23;
+    border: 1px solid #1f2937;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background-color: #1a202c;
+    border-bottom: 1px solid #1f2937;
+}
+
+.order-id {
+    font-size: 13px;
+    font-weight: 700;
+    color: #3b82f6;
+}
+
+.badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.badge.pending {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+    border: 1px solid #f59e0b;
+}
+
+.badge.completed {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid #10b981;
+}
+
+.order-details {
+    padding: 15px;
+}
+
+.order-details p {
+    font-size: 12px;
+    color: #cbd5e1;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.order-details p i {
+    color: #64748b;
+    width: 15px;
+}
+
+/* Actions Buttons */
+.order-actions {
+    display: flex;
+    border-top: 1px solid #1f2937;
+}
+
+.order-actions button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-complete {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.btn-complete:active { background-color: #10b981; color: #fff; }
+
+.btn-reject {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border-left: 1px solid #1f2937;
+}
+
+.btn-reject:active { background-color: #ef4444; color: #fff; }
+
+.btn-disabled {
+    background-color: #1a202c;
+    color: #64748b;
+    cursor: not-allowed;
+}
+
+}

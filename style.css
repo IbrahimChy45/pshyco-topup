@@ -1,0 +1,558 @@
+/* Base Setup */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* =========================================
+   BODY & HTML HEIGHT FIX (খুব জরুরি)
+========================================= */
+html, body {
+    height: 100%;
+    min-height: 100vh; /* এটি পেজকে সবসময় ফুল-স্ক্রিন লম্বা রাখবে */
+}
+
+body {
+    background-color: #0b0e14; /* Deep dark background */
+    color: #ffffff;
+    /* মেনুর নিচে যাতে কোনো কন্টেন্ট না ঢোকে তাই প্যাডিং বাড়ানো হয়েছে */
+    padding-bottom: 90px !important; 
+    margin: 0 !important;
+    position: relative;
+}
+
+/* Header */
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: #0b0e14;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-logo {
+    height: 35px;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.menu-icon, .notification-icon {
+    font-size: 22px;
+    color: #e2e8f0;
+    cursor: pointer;
+}
+
+.header-title {
+    text-align: center;
+    line-height: 1.1;
+}
+
+.title-blue {
+    display: block;
+    color: #3b82f6;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.title-white {
+    display: block;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+/* Container */
+.container {
+    padding: 15px 20px;
+}
+
+/* Hero Banner */
+.hero-banner {
+    position: relative;
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+    border-radius: 20px;
+    padding: 25px 20px;
+    height: 160px;
+    overflow: hidden;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 25px rgba(29, 78, 216, 0.2);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.banner-content {
+    position: relative;
+    z-index: 2;
+    width: 60%;
+}
+
+.banner-content h2 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: -5px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.fast-secure {
+    color: #60a5fa;
+    font-size: 16px;
+    font-style: italic;
+    font-weight: 800;
+    margin-bottom: 5px;
+}
+
+.banner-content p {
+    font-size: 11px;
+    background-color: rgba(0,0,0,0.5);
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 20px;
+}
+
+.banner-char {
+    position: absolute;
+    right: -10px;
+    bottom: 0;
+    height: 140px;
+    z-index: 1;
+}
+
+/* Section Headers */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.section-header h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #cbd5e1;
+}
+
+.view-all {
+    font-size: 12px;
+    color: #3b82f6;
+    cursor: pointer;
+}
+
+/* Game Cards */
+.game-cards-container {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+}
+
+/* Scrollbar hide for webkit */
+.game-cards-container::-webkit-scrollbar {
+    display: none;
+}
+
+.game-card {
+    min-width: 105px;
+    background-color: #151a23;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid #1f2937;
+}
+
+.game-img {
+    width: 100%;
+    height: 90px;
+    object-fit: cover;
+}
+
+.game-info {
+    padding: 10px 5px;
+    text-align: center;
+}
+
+.game-info h5 {
+    font-size: 12px;
+    font-weight: 800;
+    margin-bottom: 2px;
+    line-height: 1.1;
+}
+
+.small-text {
+    font-size: 9px;
+}
+
+.game-info p {
+    font-size: 9px;
+    color: #94a3b8;
+}
+
+/* Hot Offers List */
+.offers-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.offer-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #151a23;
+    padding: 12px 15px;
+    border-radius: 16px;
+    border: 1px solid #1f2937;
+}
+
+.offer-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.offer-icon {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+.offer-texts h5 {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 3px;
+}
+
+.offer-texts p {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.offer-price {
+    background-color: #2563eb;
+    color: white;
+    padding: 6px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* =========================================
+   FIXED BOTTOM NAVIGATION 
+========================================= */
+.bottom-nav {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    background-color: #0b0e14 !important;
+    display: flex !important;
+    justify-content: space-around !important;
+    padding: 12px 0 15px 0 !important;
+    border-top: 1px solid #1f2937 !important;
+    z-index: 999999 !important;
+    margin: 0 !important;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    color: #64748b;
+    cursor: pointer;
+}
+
+.nav-item.active {
+    color: #3b82f6;
+}
+
+.nav-item i {
+    font-size: 20px;
+}
+
+.nav-item span {
+    font-size: 10px;
+    font-weight: 600;
+}
+
+/* =========================================
+   TOP UP PAGE STYLES
+========================================= */
+.topup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 20px 10px 20px;
+    background-color: #0b0e14;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.back-btn {
+    color: #ffffff;
+    font-size: 20px;
+    text-decoration: none;
+}
+
+.topup-header h2 {
+    font-size: 16px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: 1px;
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 12px;
+    color: #94a3b8;
+    margin-bottom: 8px;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-wrapper input {
+    width: 100%;
+    background-color: #151a23;
+    border: 1px solid #1f2937;
+    color: #ffffff;
+    padding: 14px 15px;
+    border-radius: 10px;
+    font-size: 13px;
+    outline: none;
+    transition: 0.3s;
+}
+
+.input-wrapper input:focus {
+    border-color: #3b82f6;
+}
+
+.input-wrapper i {
+    position: absolute;
+    right: 15px;
+    color: #94a3b8;
+    font-size: 16px;
+}
+
+/* Section Titles */
+.section-title-small {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+/* Packages Grid */
+.package-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.package-box {
+    background-color: #151a23;
+    border: 1px solid #1f2937;
+    border-radius: 12px;
+    padding: 15px 5px;
+    text-align: center;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.package-box.active {
+    border-color: #3b82f6;
+    background-color: rgba(59, 130, 246, 0.05);
+}
+
+.pkg-amount {
+    font-size: 18px;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.pkg-name {
+    font-size: 10px;
+    color: #94a3b8;
+    margin-bottom: 5px;
+}
+
+.pkg-price {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e2e8f0;
+}
+
+.check-icon {
+    position: absolute;
+    bottom: -6px;
+    right: -6px;
+    color: #3b82f6;
+    background: #ffffff; 
+    border-radius: 50%;
+    font-size: 18px;
+    display: none;
+}
+
+.package-box.active .check-icon {
+    display: block;
+}
+
+/* Payment Method Box */
+.payment-select-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #151a23;
+    border: 1px solid #1f2937;
+    padding: 12px 15px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+}
+
+.pay-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.pay-name {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-bottom: 2px;
+}
+
+.pay-number {
+    font-size: 14px;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.pay-icon {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ml-2 {
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+/* Upload Box */
+.upload-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #151a23;
+    border: 1px dashed #334155;
+    padding: 16px 15px;
+    border-radius: 10px;
+    color: #94a3b8;
+    font-size: 13px;
+    margin-bottom: 30px;
+    cursor: pointer;
+}
+
+.upload-box i {
+    color: #3b82f6;
+    font-size: 18px;
+}
+
+/* Submit Button */
+.submit-btn {
+    width: 100%;
+    background-color: #2563eb;
+    color: #ffffff;
+    border: none;
+    padding: 16px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.submit-btn:active {
+    background-color: #1d4ed8;
+}
+
+/* Wallet Button Style (Premium Blue Theme) */
+.wallet-btn {
+    background-color: rgba(59, 130, 246, 0.15); 
+    color: #3b82f6; 
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #3b82f6; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Profile Picture Style */
+.header-profile-pic {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #3b82f6; 
+}
+
+/* Text Logo Styles */
+.logo-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+    margin-left: 5px;
+}
+
+.brand-pshyco {
+    color: #3b82f6; 
+    font-size: 20px;
+    font-weight: 900; 
+    letter-spacing: 1px;
+}
+
+.brand-topup {
+    color: #e5e7eb; 
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+}
+
+.small-brand-logo {
+    width: 35px; 
+    height: 35px;
+    object-fit: contain;
+    margin-right: 2px;
+}

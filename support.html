@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help & Support - Pshyco Top Up Center</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+    <style>
+        body { background-color: #0f172a; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding-bottom: 70px; }
+        .page-header { display: flex; align-items: center; padding: 20px; background-color: #1e293b; gap: 15px; border-bottom: 1px solid #334155; }
+        .page-title { font-size: 18px; font-weight: bold; margin: 0; }
+        .support-container { padding: 20px; }
+        .support-banner { text-align: center; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border-radius: 15px; padding: 25px 20px; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); }
+        .support-banner i { font-size: 40px; margin-bottom: 10px; color: #ffffff; }
+        .support-banner h3 { margin: 0 0 8px 0; font-size: 18px; }
+        .support-banner p { margin: 0; font-size: 13px; color: #e0e7ff; }
+        .support-list { display: flex; flex-direction: column; gap: 15px; }
+        .support-card { background-color: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; text-decoration: none; color: white; transition: 0.3s; cursor: pointer; }
+        .support-card:hover { border-color: #3b82f6; background-color: rgba(59, 130, 246, 0.1); }
+        .support-left { display: flex; align-items: center; gap: 15px; }
+        .support-icon { width: 45px; height: 45px; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 22px; }
+        .whatsapp { background-color: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .telegram { background-color: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+        .facebook { background-color: rgba(24, 119, 242, 0.15); color: #1877f2; }
+        .phone { background-color: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+        .support-info h4 { margin: 0 0 3px 0; font-size: 15px; }
+        .support-info p { margin: 0; font-size: 12px; color: #94a3b8; }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="page-header">
+        <h2 class="page-title">Help & Support</h2>
+    </div>
+
+    <div class="support-container">
+        <!-- Support Banner -->
+        <div class="support-banner">
+            <i class="fa-solid fa-headset"></i>
+            <h3>Need Help?</h3>
+            <p>We are here to help you 24/7. Feel free to contact us through any of the channels below.</p>
+        </div>
+
+        <!-- Support Cards -->
+        <div class="support-list">
+            
+            <!-- WhatsApp Support -->
+            <a id="wa-link" href="#" target="_blank" class="support-card">
+                <div class="support-left">
+                    <div class="support-icon whatsapp"><i class="fa-brands fa-whatsapp"></i></div>
+                    <div class="support-info">
+                        <h4>WhatsApp Support</h4>
+                        <p>Chat with us on WhatsApp</p>
+                    </div>
+                </div>
+                <i class="fa-solid fa-chevron-right" style="color: #64748b; font-size: 12px;"></i>
+            </a>
+
+            <!-- Telegram Support -->
+            <a id="tg-link" href="#" target="_blank" class="support-card">
+                <div class="support-left">
+                    <div class="support-icon telegram"><i class="fa-brands fa-telegram"></i></div>
+                    <div class="support-info">
+                        <h4>Telegram Support</h4>
+                        <p>Join our Telegram channel/group</p>
+                    </div>
+                </div>
+                <i class="fa-solid fa-chevron-right" style="color: #64748b; font-size: 12px;"></i>
+            </a>
+
+            <!-- Facebook Page -->
+            <a href="#" target="_blank" class="support-card">
+                <div class="support-left">
+                    <div class="support-icon facebook"><i class="fa-brands fa-facebook-f"></i></div>
+                    <div class="support-info">
+                        <h4>Facebook Page</h4>
+                        <p>Like and message our page</p>
+                    </div>
+                </div>
+                <i class="fa-solid fa-chevron-right" style="color: #64748b; font-size: 12px;"></i>
+            </a>
+
+            <!-- Helpline Number -->
+            <a id="phone-link" href="#" class="support-card">
+                <div class="support-left">
+                    <div class="support-icon phone"><i class="fa-solid fa-phone"></i></div>
+                    <div class="support-info">
+                        <h4>Helpline Number</h4>
+                        <p id="phone-text">লোড হচ্ছে...</p>
+                    </div>
+                </div>
+                <i class="fa-solid fa-chevron-right" style="color: #64748b; font-size: 12px;"></i>
+            </a>
+
+        </div>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+        <div class="nav-item" onclick="window.location.href='index.html'"><i class="fa-solid fa-house"></i><span>Home</span></div>
+        <div class="nav-item" onclick="window.location.href='order.html'"><i class="fa-solid fa-clipboard-list"></i><span>Order</span></div>
+        <div class="nav-item" onclick="window.location.href='addmoney.html'"><i class="fa-solid fa-wallet"></i><span>Add Money</span></div>
+        <div class="nav-item active"><i class="fa-solid fa-headset"></i><span>Support</span></div>
+    </nav>
+
+    <!-- 👇 Firebase Script 👇 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyD2d_najqnMXstfTvjlR6_4kffh5axIasY",
+          authDomain: "pshyco-top-up-center.firebaseapp.com",
+          databaseURL: "https://pshyco-top-up-center-default-rtdb.asia-southeast1.firebasedatabase.app/",
+          projectId: "pshyco-top-up-center",
+          storageBucket: "pshyco-top-up-center.firebasestorage.app",
+          messagingSenderId: "454109876822",
+          appId: "1:454109876822:web:6141a2e77780f75051a1f7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const supportRef = ref(db, 'settings/support_info');
+                
+                onValue(supportRef, (snapshot) => {
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        
+                        // WhatsApp Number Setup
+                        if(data.whatsapp && data.whatsapp.trim() !== "") {
+                            document.getElementById('wa-link').href = "https://wa.me/" + data.whatsapp;
+                            document.getElementById('phone-link').href = "tel:+" + data.whatsapp;
+                            document.getElementById('phone-text').innerText = "+" + data.whatsapp;
+                        } else {
+                            document.getElementById('phone-text').innerText = "Not Set";
+                        }
+                        
+                        // Telegram Username / Link Setup
+                        if(data.telegram && data.telegram.trim() !== "") {
+                            let tgUser = data.telegram.trim().replace('@', ''); // @ রিমুভ করবে
+                            
+                            // যদি কেউ ভুল করে লিংক দিয়ে দেয়, সেটা সামলানোর জন্য
+                            if(tgUser.startsWith('http') || tgUser.startsWith('t.me')) {
+                                document.getElementById('tg-link').href = tgUser.startsWith('http') ? tgUser : 'https://' + tgUser;
+                            } else {
+                                // শুধু ইউজারনেম দিলে অটোমেটিক লিংক বানিয়ে নেবে
+                                document.getElementById('tg-link').href = "https://t.me/" + tgUser;
+                            }
+                        }
+                    } else {
+                        document.getElementById('phone-text').innerText = "Not Set";
+                    }
+                });
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Top Up</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* 👇 ম্যাজিক এনিমেশন কোড 👇 */
+        body { background-color: #0b0f19; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding-bottom: 80px; animation: pageLoad 0.4s ease-out forwards; }
+        @keyframes pageLoad { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+        .pkg-card:active, .nav-item:active, .submit-btn:active, .back-btn:active { transform: scale(0.92) !important; transition: transform 0.1s ease !important; }
+        /* 👆 ম্যাজিক এনিমেশন শেষ 👆 */
+
+        .premium-header { display: flex; align-items: center; justify-content: center; padding: 20px; position: relative; background-color: #0b0f19; }
+        .premium-header .back-btn { position: absolute; left: 20px; font-size: 20px; color: #ffffff; cursor: pointer; }
+        .premium-header .title { font-size: 16px; font-weight: bold; letter-spacing: 1px; margin: 0; display: flex; align-items: center; gap: 5px; text-transform: uppercase; }
+        .premium-header .title span { color: #3b82f6; }
+        .content-container { padding: 0 20px; }
+        .section-label { font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-top: 20px; margin-bottom: 8px; display: block; }
+        .input-box { position: relative; width: 100%; }
+        .input-box input { width: 100%; background-color: #151b29; border: 1px solid #2a3449; color: white; padding: 14px 15px; border-radius: 10px; box-sizing: border-box; font-size: 14px; outline: none; transition: 0.3s; }
+        .input-box input:focus { border-color: #3b82f6; }
+        .package-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .pkg-card { background-color: #151b29; border: 1.5px solid #2a3449; border-radius: 10px; padding: 15px 5px; text-align: center; cursor: pointer; position: relative; transition: 0.3s; }
+        .pkg-card.selected { border-color: #3b82f6; background-color: rgba(59, 130, 246, 0.05); }
+        .pkg-card h3 { margin: 0; font-size: 18px; font-weight: bold; }
+        .pkg-card p { margin: 2px 0 8px 0; font-size: 10px; color: #94a3b8; }
+        .pkg-card .price { font-size: 14px; font-weight: bold; color: #e2e8f0; margin: 0; }
+        .checkmark { display: none; position: absolute; bottom: -6px; right: -6px; background-color: #3b82f6; color: white; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; align-items: center; justify-content: center; border: 2px solid #0b0f19; }
+        .pkg-card.selected .checkmark { display: flex; }
+        .wallet-box { background-color: #151b29; border: 1px solid #3b82f6; border-radius: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .wallet-info h4 { margin: 0 0 4px 0; font-size: 14px; font-weight: normal; }
+        .wallet-info p { margin: 0; font-size: 13px; color: #94a3b8; }
+        .wallet-balance { font-size: 18px; font-weight: bold; color: #3b82f6; display: flex; align-items: center; gap: 8px;}
+        .submit-btn { width: 100%; background-color: #1d4ed8; color: white; border: none; padding: 16px; border-radius: 10px; font-size: 14px; font-weight: bold; margin-top: 30px; cursor: pointer; box-shadow: 0 4px 15px rgba(29, 78, 216, 0.4); transition: 0.3s;}
+        .submit-btn:disabled { background-color: #475569; cursor: not-allowed; box-shadow: none; }
+        .submit-btn:active:not(:disabled) { background-color: #1e40af; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background-color: #1e293b; padding: 25px; border-radius: 15px; text-align: center; width: 80%; max-width: 300px; border: 1px solid #334155; }
+        .success-icon { font-size: 40px; color: #10b981; margin-bottom: 15px; }
+        .modal-content h3 { margin-top: 0; color: white; }
+        .modal-content p { color: #cbd5e1; font-size: 14px; margin-bottom: 20px; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: #151b29; border-top: 1px solid #2a3449; display: flex; justify-content: space-around; padding: 12px 0; z-index: 99; }
+        .nav-item { text-align: center; color: #94a3b8; cursor: pointer; font-size: 12px; }
+        .nav-item i { font-size: 20px; display: block; margin-bottom: 4px; }
+        .nav-item.active { color: #3b82f6; }
+    </style>
+</head>
+<body>
+    <div class="premium-header">
+        <div class="back-btn" onclick="window.location.href='index.html'"><i class="fa-solid fa-chevron-left"></i></div>
+        <h2 class="title" id="dynamic-title">LOADING<span>...</span></h2>
+    </div>
+    
+    <div class="content-container">
+        <label class="section-label" id="input-label">Player UID / Tag</label>
+        <div class="input-box"><input type="text" id="playerUid" placeholder="Enter Player ID/Tag"></div>
+        
+        <label class="section-label">Player Name (optional)</label>
+        <div class="input-box"><input type="text" id="playerName" placeholder="Enter Player Name"></div>
+        
+        <label class="section-label">SELECT PACKAGE <i class="fa-solid fa-bolt" style="color: #3b82f6;"></i></label>
+        <div class="package-grid" id="packages-container">
+            <div style="grid-column: span 3; text-align: center; color: #94a3b8; font-size: 13px; padding: 20px;">প্যাকেজ লোড হচ্ছে...</div>
+        </div>
+        
+        <label class="section-label">PAYMENT METHOD</label>
+        <div class="wallet-box">
+            <div class="wallet-info"><h4>My Wallet</h4><p>Available Balance</p></div>
+            <div class="wallet-balance"><i class="fa-solid fa-wallet"></i><span id="current-balance">লোড হচ্ছে...</span></div>
+        </div>
+        
+        <button id="submit-btn" class="submit-btn" disabled>Please Select a Package</button>
+    </div>
+
+    <div class="modal" id="successModal"><div class="modal-content"><i class="fa-solid fa-circle-check success-icon"></i><h3>Order Successful!</h3><p>Your order has been placed.</p></div></div>
+    
+    <nav class="bottom-nav">
+        <div class="nav-item" onclick="window.location.href='index.html'"><i class="fa-solid fa-house"></i><span>Home</span></div>
+        <div class="nav-item" onclick="window.location.href='order.html'"><i class="fa-solid fa-clipboard-list"></i><span>Order</span></div>
+        <div class="nav-item" onclick="window.location.href='addmoney.html'"><i class="fa-solid fa-wallet"></i><span>Add Money</span></div>
+        <div class="nav-item" onclick="window.location.href='support.html'"><i class="fa-solid fa-headset"></i><span>Support</span></div>
+    </nav>
+
+    <!-- ডায়নামিক লজিক (যা লিংক থেকে গেমের নাম ও ডেটাবেস চিনে নেবে) -->
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const gameName = urlParams.get('name') || 'Top Up';
+        const dbNode = urlParams.get('db') || 'freefire_packages';
+
+        document.getElementById('dynamic-title').innerHTML = `${gameName} <span>TOP UP</span>`;
+        document.title = `${gameName} Top Up`;
+
+        window.selectedDiamond = ""; window.selectedPrice = 0; window.selectedPkgName = "";
+        window.selectPackage = function(element, diamond, price, pkgName) {
+            let cards = document.querySelectorAll('.pkg-card'); cards.forEach(card => card.classList.remove('selected'));
+            element.classList.add('selected'); window.selectedDiamond = diamond; window.selectedPrice = price; window.selectedPkgName = pkgName;
+            let btn = document.getElementById('submit-btn'); btn.innerText = `PAY ৳${price} FROM WALLET`; btn.disabled = false;
+        }
+    </script>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, onValue, push, set, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        
+        const firebaseConfig = { apiKey: "AIzaSyD2d_najqnMXstfTvjlR6_4kffh5axIasY", authDomain: "pshyco-top-up-center.firebaseapp.com", databaseURL: "https://pshyco-top-up-center-default-rtdb.asia-southeast1.firebasedatabase.app/", projectId: "pshyco-top-up-center", storageBucket: "pshyco-top-up-center.firebasestorage.app", messagingSenderId: "454109876822", appId: "1:454109876822:web:6141a2e77780f75051a1f7" };
+        const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getDatabase(app);
+        
+        let currentUser = null; let currentBalance = 0;
+        
+        onAuthStateChanged(auth, (user) => { if (user) { currentUser = user; onValue(ref(db, 'users/' + user.uid), (snapshot) => { if (snapshot.exists() && snapshot.val().balance !== undefined) { currentBalance = snapshot.val().balance; document.getElementById("current-balance").innerText = currentBalance + "৳"; } else { currentBalance = 0; document.getElementById("current-balance").innerText = "0৳"; } }); } else { window.location.href = "login.html"; } });
+        
+        onValue(ref(db, dbNode), (snapshot) => {
+            const container = document.getElementById('packages-container'); const submitBtn = document.getElementById('submit-btn');
+            container.innerHTML = ''; let isFirst = true;
+            if (snapshot.exists()) {
+                snapshot.forEach(child => {
+                    const pkg = child.val(); const card = document.createElement('div'); card.className = `pkg-card ${isFirst ? 'selected' : ''}`; 
+                    card.onclick = function() { window.selectPackage(this, pkg.diamond, pkg.price, pkg.name); };
+                    card.innerHTML = `<h3>${pkg.diamond}</h3><p>${pkg.name}</p><div class="price">৳${pkg.price}</div><div class="checkmark"><i class="fa-solid fa-check"></i></div>`;
+                    container.appendChild(card);
+                    if(isFirst) { window.selectedDiamond = pkg.diamond; window.selectedPrice = pkg.price; window.selectedPkgName = pkg.name; submitBtn.innerText = `PAY ৳${pkg.price} FROM WALLET`; submitBtn.disabled = false; isFirst = false; }
+                });
+            } else { container.innerHTML = '<div style="grid-column: span 3; text-align: center; color: #94a3b8; font-size: 13px; padding: 20px;">No packages available right now!</div>'; submitBtn.innerText = "No Packages Available"; submitBtn.disabled = true; window.selectedPrice = 0; }
+        });
+        
+        document.getElementById("submit-btn").addEventListener("click", async () => {
+            if (!currentUser) return; let uid = document.getElementById("playerUid").value.trim(); let name = document.getElementById("playerName").value.trim();
+            if (uid === "") return alert("Please enter Player ID!"); if (window.selectedPrice === 0 || document.getElementById('submit-btn').disabled) return;
+            if (currentBalance < window.selectedPrice) { alert("Insufficient balance! Please Add Money."); window.location.href = "addmoney.html"; return; }
+            let submitBtn = document.getElementById('submit-btn'); submitBtn.innerText = "Processing..."; submitBtn.disabled = true;
+            try {
+                await update(ref(db, 'users/' + currentUser.uid), { balance: currentBalance - window.selectedPrice });
+                const orderData = { uid: currentUser.uid, userPhone: currentUser.phoneNumber || "Unknown", game: gameName, packageName: window.selectedDiamond + " " + window.selectedPkgName, price: window.selectedPrice, playerId: uid, playerName: name || "N/A", status: "Pending", timestamp: Date.now() };
+                await set(push(ref(db, 'orders')), orderData);
+                
+                const botToken = "8855610877:AAFWPoSpQSCWqg7Tk2iElOr5RU2ZTF991fY"; const chatId = "1832778405";     
+                const message = `🎮 *New ${gameName} Order*\n\n👤 *User:* ${orderData.userPhone}\n💎 *Package:* ${orderData.packageName}\n💵 *Price:* ৳${orderData.price}\n🆔 *Player ID:* ${orderData.playerId}\n📝 *Name:* ${orderData.playerName}\n⚙️ *Status:* Pending`;
+                fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}&parse_mode=Markdown`);
+                
+                document.getElementById('successModal').style.display = 'flex'; setTimeout(() => { window.location.href = "order.html"; }, 2000);
+            } catch (error) { alert("Error: " + error.message); submitBtn.innerText = `PAY ৳${window.selectedPrice} FROM WALLET`; submitBtn.disabled = false; }
+        });
+    </script>
+</body>
+</html>
