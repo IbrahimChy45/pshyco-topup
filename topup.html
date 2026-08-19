@@ -83,7 +83,6 @@
         <div class="nav-item" onclick="window.location.href='support.html'"><i class="fa-solid fa-headset"></i><span>Support</span></div>
     </nav>
 
-    <!-- ডায়নামিক লজিক (যা লিংক থেকে গেমের নাম ও ডেটাবেস চিনে নেবে) -->
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const gameName = urlParams.get('name') || 'Top Up';
@@ -108,9 +107,24 @@
         const firebaseConfig = { apiKey: "AIzaSyD2d_najqnMXstfTvjlR6_4kffh5axIasY", authDomain: "pshyco-top-up-center.firebaseapp.com", databaseURL: "https://pshyco-top-up-center-default-rtdb.asia-southeast1.firebasedatabase.app/", projectId: "pshyco-top-up-center", storageBucket: "pshyco-top-up-center.firebasestorage.app", messagingSenderId: "454109876822", appId: "1:454109876822:web:6141a2e77780f75051a1f7" };
         const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getDatabase(app);
         
-        let currentUser = null; let currentBalance = 0;
+        let currentUser = null; let currentBalance = 0; let userEmail = "";
         
-        onAuthStateChanged(auth, (user) => { if (user) { currentUser = user; onValue(ref(db, 'users/' + user.uid), (snapshot) => { if (snapshot.exists() && snapshot.val().balance !== undefined) { currentBalance = snapshot.val().balance; document.getElementById("current-balance").innerText = currentBalance + "৳"; } else { currentBalance = 0; document.getElementById("current-balance").innerText = "0৳"; } }); } else { window.location.href = "login.html"; } });
+        onAuthStateChanged(auth, (user) => { 
+            if (user) { 
+                currentUser = user; 
+                userEmail = user.email || "Unknown"; // 👇 জিমেইল সেভ করে নিলাম 👇
+                onValue(ref(db, 'users/' + user.uid), (snapshot) => { 
+                    if (snapshot.exists() && snapshot.val().balance !== undefined) { 
+                        currentBalance = snapshot.val().balance; 
+                        document.getElementById("current-balance").innerText = currentBalance + "৳"; 
+                    } else { 
+                        currentBalance = 0; document.getElementById("current-balance").innerText = "0৳"; 
+                    } 
+                }); 
+            } else { 
+                window.location.href = "login.html"; 
+            } 
+        });
         
         onValue(ref(db, dbNode), (snapshot) => {
             const container = document.getElementById('packages-container'); const submitBtn = document.getElementById('submit-btn');
@@ -133,7 +147,20 @@
             let submitBtn = document.getElementById('submit-btn'); submitBtn.innerText = "Processing..."; submitBtn.disabled = true;
             try {
                 await update(ref(db, 'users/' + currentUser.uid), { balance: currentBalance - window.selectedPrice });
-                const orderData = { uid: currentUser.uid, userPhone: currentUser.phoneNumber || "Unknown", game: gameName, packageName: window.selectedDiamond + " " + window.selectedPkgName, price: window.selectedPrice, playerId: uid, playerName: name || "N/A", status: "Pending", timestamp: Date.now() };
+                
+                // 👇 এখানে userPhone এর জায়গায় userEmail পাঠিয়ে দিলাম 👇
+                const orderData = { 
+                    uid: currentUser.uid, 
+                    userPhone: userEmail, 
+                    game: gameName, 
+                    packageName: window.selectedDiamond + " " + window.selectedPkgName, 
+                    price: window.selectedPrice, 
+                    playerId: uid, 
+                    playerName: name || "N/A", 
+                    status: "Pending", 
+                    timestamp: Date.now() 
+                };
+                
                 await set(push(ref(db, 'orders')), orderData);
                 
                 const botToken = "8855610877:AAFWPoSpQSCWqg7Tk2iElOr5RU2ZTF991fY"; const chatId = "1832778405";     
