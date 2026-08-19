@@ -160,9 +160,12 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
+        // লগিন করার পর রিডাইরেক্ট লক (যাতে অ্যালার্ট শো করতে পারে)
+        let isRegistering = false;
+
         // Check if already logged in
         onAuthStateChanged(auth, (user) => {
-            if (user) { window.location.href = "index.html"; }
+            if (user && !isRegistering) { window.location.href = "index.html"; }
         });
 
         // --- LOGIN LOGIC ---
@@ -177,6 +180,7 @@
 
             try {
                 await signInWithEmailAndPassword(auth, email, pass);
+                window.location.href = "index.html";
             } catch (error) {
                 alert("Login Failed: " + error.message);
                 btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Login Now'; 
@@ -212,6 +216,7 @@
             if(pass.length < 6) return alert("Password must be at least 6 characters!");
 
             btn.innerText = "Creating Account..."; btn.disabled = true;
+            isRegistering = true; // রিডাইরেক্ট লক অন করা হলো
 
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
@@ -234,7 +239,14 @@
                     trxid: 'INIT'
                 });
 
+                // ম্যাজিক পপ-আপ
+                alert("✅ অভিনন্দন! আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে।");
+                
+                // ইউজার OK চাপার পর হোমপেজে যাবে
+                window.location.href = "index.html";
+
             } catch (error) {
+                isRegistering = false; // লক অফ
                 alert("Registration Failed: " + error.message);
                 btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Create Account'; 
                 btn.disabled = false;
