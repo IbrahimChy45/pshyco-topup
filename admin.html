@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+        <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -80,7 +80,6 @@
         
         <div class="admin-section">
             <h3 class="section-title"><i class="fa-solid fa-coins" style="color: #10b981;"></i> Manage User Balance</h3>
-            <!-- 👇 লেখা ও ইনপুট টাইপ আপডেট করা হয়েছে 👇 -->
             <p style="font-size: 11px; color: #94a3b8; margin-top:-5px; margin-bottom: 12px;">ইউজারের জিমেইল, ফোন নাম্বার বা UID দিয়ে সরাসরি ব্যালেন্স অ্যাড করুন।</p>
             <input type="text" id="user-email" class="input-dark" placeholder="Email, Phone Number or UID">
             <input type="number" id="add-amount" class="input-dark" placeholder="Amount (৳)">
@@ -143,6 +142,18 @@
 
     <!-- TAB 4: SETTINGS -->
     <div id="tab-settings" class="tab-content">
+        <!-- 👇 Maintenance Mode Section 👇 -->
+        <div class="admin-section" style="border-color: #f59e0b; background-color: rgba(245, 158, 11, 0.05);">
+            <h3 class="section-title" style="color: #f59e0b; border-bottom-color: rgba(245, 158, 11, 0.2);"><i class="fa-solid fa-person-digging"></i> Maintenance Mode</h3>
+            <p style="font-size: 11px; color: #94a3b8; margin-top:-5px; margin-bottom: 12px;">এটি অন করলে ইউজাররা অ্যাপে ঢুকতে বা কোনো কাজ করতে পারবে না।</p>
+            <input type="text" id="admin-maintenance-msg" class="input-dark" placeholder="Message: e.g. সার্ভার আপডেট চলছে...">
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button onclick="window.toggleMaintenance(true)" class="submit-btn" style="background-color: #f59e0b; color: white;"><i class="fa-solid fa-lock"></i> Turn ON</button>
+                <button onclick="window.toggleMaintenance(false)" class="submit-btn" style="background-color: #10b981; color: white;"><i class="fa-solid fa-lock-open"></i> Turn OFF</button>
+            </div>
+            <p id="maintenance-status-text" style="font-size: 13px; font-weight: bold; margin-top: 15px; color: #10b981;">Current Status: 🟢 OFF</p>
+        </div>
+
         <div class="admin-section">
             <h3 class="section-title"><i class="fa-solid fa-mobile-screen" style="color: #e11471;"></i> Payment Numbers</h3>
             <input type="text" id="admin-bkash" class="input-dark" placeholder="bKash Number">
@@ -339,9 +350,36 @@
             });
 
             onValue(ref(db, 'hot_offers'), (snapshot) => { let container = document.getElementById('admin-offer-list'); let html = ''; if (snapshot.exists()) { snapshot.forEach(child => { let offer = child.val(); html += `<div style="background: #151b29; padding: 12px; border: 1px solid #2a3449; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;"><div style="display:flex; align-items:center; gap: 10px;"><img src="${offer.image}" style="width: 30px; height: 30px; border-radius:5px; object-fit:cover;"><div><b style="color: white; font-size: 13px;">${offer.title}</b><div style="color: #ef4444; font-size: 10px;">৳${offer.newPrice}</div></div></div><button onclick="window.deleteItem('hot_offers', '${child.key}')" style="background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">Delete</button></div>`; }); container.innerHTML = html; } else { container.innerHTML = '<div class="empty-msg">No active offers!</div>'; } });
+            
+            // 👇 Maintenance Mode Reading Logic 👇
+            onValue(ref(db, 'settings/maintenance'), (snapshot) => { 
+                if (snapshot.exists()) { 
+                    const data = snapshot.val(); 
+                    document.getElementById('admin-maintenance-msg').value = data.message || ""; 
+                    if(data.status === true) {
+                        document.getElementById('maintenance-status-text').innerText = "Current Status: 🔴 ON (App Locked)";
+                        document.getElementById('maintenance-status-text').style.color = "#ef4444";
+                    } else {
+                        document.getElementById('maintenance-status-text').innerText = "Current Status: 🟢 OFF (App Active)";
+                        document.getElementById('maintenance-status-text').style.color = "#10b981";
+                    }
+                } 
+            });
+
             onValue(ref(db, 'settings/payment_numbers'), (snapshot) => { if (snapshot.exists()) { const data = snapshot.val(); document.getElementById('admin-bkash').value = data.bkash || ""; document.getElementById('admin-nagad').value = data.nagad || ""; } });
             onValue(ref(db, 'settings/ui_settings'), (snapshot) => { if (snapshot.exists()) { const data = snapshot.val(); document.getElementById('admin-banner1').value = data.banner1 || ""; document.getElementById('admin-banner2').value = data.banner2 || ""; document.getElementById('admin-banner3').value = data.banner3 || ""; document.getElementById('admin-warning-img').value = data.warningImg || ""; document.getElementById('admin-warning-text').value = data.warningText || ""; } });
             onValue(ref(db, 'settings/support_info'), (snapshot) => { if (snapshot.exists()) { const data = snapshot.val(); document.getElementById('admin-whatsapp').value = data.whatsapp || ""; document.getElementById('admin-telegram').value = data.telegram || ""; } });
+        }
+
+        // 👇 Maintenance Mode Writing Logic 👇
+        window.toggleMaintenance = async (status) => {
+            let msg = document.getElementById('admin-maintenance-msg').value.trim() || "সার্ভার আপডেটের কাজ চলছে। দয়া করে কিছুক্ষণ পর আবার চেষ্টা করুন!";
+            let confirmMsg = status ? "সতর্কতা! মেইনটেনেন্স মোড অন করলে ইউজাররা অ্যাপ ব্যবহার করতে পারবে না। আপনি কি নিশ্চিত?" : "মেইনটেনেন্স মোড অফ করতে চান? ইউজাররা আবার অ্যাপ ব্যবহার করতে পারবে।";
+            
+            if(confirm(confirmMsg)) {
+                await set(ref(db, 'settings/maintenance'), { status: status, message: msg });
+                alert(status ? "Maintenance Mode is ON 🔴\nইউজাররা এখন অ্যাপে ঢুকতে পারবে না।" : "Maintenance Mode is OFF 🟢\nঅ্যাপ আবার লাইভ হয়েছে!");
+            }
         }
 
         window.updateStatus = async (path, id, newStatus) => { if(confirm(`Mark as ${newStatus}?`)) await update(ref(db, `${path}/${id}`), { status: newStatus }); }
@@ -349,55 +387,35 @@
         window.approveMoney = async (reqId, uid, amount) => { if(confirm(`Approve adding ৳${amount}?`)) { await update(ref(db, `add_money_requests/${reqId}`), { status: 'Completed' }); const snap = await get(ref(db, `users/${uid}`)); let currentBal = (snap.exists() && snap.val().balance) ? Number(snap.val().balance) : 0; await update(ref(db, `users/${uid}`), { balance: currentBal + Number(amount) }); alert("Successfully added balance!"); } }
         window.resetAllData = async () => { if(confirm("সতর্কতা! সমস্ত রেকর্ড মুছে ফেলতে চান?")) { try { await remove(ref(db, 'orders')); await remove(ref(db, 'add_money_requests')); alert("রেকর্ড মুছে ফেলা হয়েছে!"); document.getElementById('stat-total-orders').innerText = "0"; document.getElementById('stat-pending').innerText = "0"; document.getElementById('stat-revenue').innerText = "৳ 0"; } catch (e) { alert("Error: " + e.message); } } };
 
-        // 👇 ব্যালেন্স অ্যাড করার আপডেট লজিক 👇
         document.getElementById('direct-add-btn').addEventListener('click', async () => { 
             let searchVal = document.getElementById('user-email').value.trim(); 
             let searchLower = searchVal.toLowerCase();
             let amount = Number(document.getElementById('add-amount').value); 
             
-            if(!searchVal || amount <= 0) {
-                return alert("⚠️ সঠিক জিমেইল, ফোন নাম্বার অথবা UID দিন এবং অ্যামাউন্ট লিখুন!"); 
-            }
+            if(!searchVal || amount <= 0) { return alert("⚠️ সঠিক জিমেইল, ফোন নাম্বার অথবা UID দিন এবং অ্যামাউন্ট লিখুন!"); }
             
-            let btn = document.getElementById('direct-add-btn'); 
-            btn.innerText = "Searching..."; 
-            btn.disabled = true; 
-            
-            let foundUid = null; 
-            const usersSnap = await get(ref(db, 'users')); 
+            let btn = document.getElementById('direct-add-btn'); btn.innerText = "Searching..."; btn.disabled = true; 
+            let foundUid = null; const usersSnap = await get(ref(db, 'users')); 
             
             if(usersSnap.exists()) { 
-                // ১. প্রথমে সরাসরি UID দিয়ে চেক করবে
-                if (usersSnap.hasChild(searchVal)) {
-                    foundUid = searchVal;
-                } else {
-                    // ২. UID না পেলে জিমেইল বা ফোন নাম্বার দিয়ে খুঁজবে
+                if (usersSnap.hasChild(searchVal)) { foundUid = searchVal; } else {
                     usersSnap.forEach(child => { 
                         let userData = child.val(); 
                         let dbEmail = userData.email ? userData.email.toLowerCase() : "";
                         let dbPhone = userData.phone ? String(userData.phone) : "";
-                        
-                        if(dbEmail === searchLower || dbPhone === searchVal) {
-                            foundUid = child.key; 
-                        }
+                        if(dbEmail === searchLower || dbPhone === searchVal) { foundUid = child.key; }
                     }); 
                 }
             } 
             
             if(foundUid) { 
-                const balRef = ref(db, `users/${foundUid}/balance`); 
-                const snap = await get(balRef); 
-                let currentBal = snap.exists() ? Number(snap.val()) : 0; 
-                await set(balRef, currentBal + amount); 
+                const balRef = ref(db, `users/${foundUid}/balance`); const snap = await get(balRef); 
+                let currentBal = snap.exists() ? Number(snap.val()) : 0; await set(balRef, currentBal + amount); 
                 alert(`✅ সাফল্য! অ্যাকাউন্টে ৳${amount} অ্যাড করা হয়েছে।`); 
-                document.getElementById('user-email').value = ""; 
-                document.getElementById('add-amount').value = ""; 
-            } else { 
-                alert("❌ অ্যাকাউন্ট পাওয়া যায়নি! জিমেইল, ফোন বা UID সঠিক কি না চেক করুন।"); 
-            } 
+                document.getElementById('user-email').value = ""; document.getElementById('add-amount').value = ""; 
+            } else { alert("❌ অ্যাকাউন্ট পাওয়া যায়নি! জিমেইল, ফোন বা UID সঠিক কি না চেক করুন।"); } 
             
-            btn.innerText = "+ Add Balance"; 
-            btn.disabled = false; 
+            btn.innerText = "+ Add Balance"; btn.disabled = false; 
         });
 
         document.getElementById('add-pkg-btn').addEventListener('click', async () => { let gameNode = document.getElementById('new-pkg-game').value; if(!gameNode) return alert("Please add a game first!"); let diamond = document.getElementById('new-pkg-diamond').value.trim(); let name = document.getElementById('new-pkg-type').value.trim(); let price = Number(document.getElementById('new-pkg-price').value); if(!diamond || !name || price <= 0) return alert("Fill all fields!"); let btn = document.getElementById('add-pkg-btn'); btn.innerText = "Adding..."; let keyName = diamond.replace(/\s+/g, '_').toLowerCase() + '_' + Date.now(); await set(ref(db, `${gameNode}/pkg_${keyName}`), { diamond, name, price }); alert("Package Added!"); document.getElementById('new-pkg-diamond').value = ""; document.getElementById('new-pkg-type').value = ""; document.getElementById('new-pkg-price').value = ""; btn.innerText = "+ Add Package"; });
