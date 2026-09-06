@@ -124,7 +124,6 @@
 
     <!-- Normal UI Script -->
     <script>
-        // ভেরিয়েবলগুলো এখন গ্লোবালি ফায়ারবেস থেকে আপডেট হবে
         window.bkashNumber = "লোড হচ্ছে..."; 
         window.nagadNumber = "লোড হচ্ছে...";
         window.currentMethod = 'bKash';
@@ -176,7 +175,10 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
+        
+        // 👇 জিমেইল সেভ করার জন্য নতুন ভেরিয়েবল 👇
         let currentUser = null;
+        let userEmail = "Unknown";
 
         // ১. অ্যাডমিন প্যানেল থেকে পেমেন্ট নাম্বার লোড করা
         const numbersRef = ref(db, 'settings/payment_numbers');
@@ -186,11 +188,10 @@
                 window.bkashNumber = data.bkash || "Not Set";
                 window.nagadNumber = data.nagad || "Not Set";
             } else {
-                window.bkashNumber = "01989700084"; // ডিফল্ট 
-                window.nagadNumber = "01829648745"; // ডিফল্ট
+                window.bkashNumber = "01989700084"; 
+                window.nagadNumber = "01829648745"; 
             }
             
-            // ডাটা লোড হওয়ার সাথে সাথে UI তে আপডেট করা
             if(window.currentMethod === 'bKash') {
                 document.getElementById('payment-number').innerText = window.bkashNumber;
             } else {
@@ -198,10 +199,11 @@
             }
         });
 
-        // ২. ইউজার ব্যালেন্স লোড
+        // ২. ইউজার ব্যালেন্স এবং জিমেইল লোড
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
+                userEmail = user.email || "Unknown"; // ইউজারের জিমেইল এখানে সেভ হচ্ছে
                 const userRef = ref(db, 'users/' + user.uid);
                 onValue(userRef, (snapshot) => {
                     if (snapshot.exists() && snapshot.val().balance !== undefined) {
@@ -236,9 +238,10 @@
             const requestsRef = ref(db, 'add_money_requests');
             const newRequestRef = push(requestsRef); 
 
+            // 👇 userPhone এর জায়গায় জিমেইল পাঠানো হচ্ছে 👇
             const requestData = {
                 uid: currentUser.uid,
-                userPhone: currentUser.phoneNumber || "Unknown",
+                userPhone: userEmail, 
                 method: window.currentMethod || "bKash",
                 amount: Number(amount),
                 trxid: trxid,
