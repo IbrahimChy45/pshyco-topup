@@ -22,7 +22,7 @@
             transition: transform 0.1s ease !important; 
         }
 
-        /* 👇 Bottom Navigation Fixed Code 👇 */
+        /* Bottom Navigation Fixed Code */
         .bottom-nav {
             position: fixed !important;
             bottom: 0 !important;
@@ -39,7 +39,7 @@
         .nav-item i { font-size: 20px; display: block; margin-bottom: 4px; }
         .nav-item.active { color: #3b82f6; }
 
-        /* 👇 Pull to Refresh Spinner Style 👇 */
+        /* Pull to Refresh Spinner Style */
         #refresh-spinner {
             position: fixed;
             top: -50px;
@@ -59,12 +59,42 @@
             border: 1px solid #334155;
             transition: top 0.3s ease;
         }
+
+        /* 👇 Floating Live Chat Button Style 👇 */
+        .floating-chat-btn {
+            position: fixed;
+            bottom: 75px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: #25d366; /* WhatsApp Green */
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            box-shadow: 0 4px 20px rgba(37, 211, 102, 0.5);
+            z-index: 9998;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            text-decoration: none;
+            border: 2px solid white;
+        }
+        .floating-chat-btn:hover {
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body style="background-color: #0b0f19; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding-bottom: 90px;">
 
     <!-- Pull to Refresh Indicator -->
     <div id="refresh-spinner"><i class="fa-solid fa-rotate fa-spin"></i> রিফ্রেশ হচ্ছে...</div>
+
+    <!-- 👇 Floating Live Chat Widget (WhatsApp / Support) 👇 -->
+    <a href="https://wa.me/+8801700000000" target="_blank" class="floating-chat-btn" title="Live Support">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
 
     <!-- Header Section -->
     <header class="app-header" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px;">
@@ -232,7 +262,7 @@
         });
         function closePopup() { document.getElementById("noticePopup").style.display = "none"; sessionStorage.setItem("noticeShown", "true"); }
 
-        // 👇 Pull to Refresh Touch Logic 👇
+        // Pull to Refresh Touch Logic
         let touchStartY = 0;
         const spinner = document.getElementById('refresh-spinner');
 
