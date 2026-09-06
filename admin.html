@@ -15,11 +15,8 @@
         .admin-tabs::-webkit-scrollbar { display: none; }
         .tab-btn { background: #1e293b; color: #94a3b8; border: 1px solid #334155; padding: 8px 16px; border-radius: 20px; white-space: nowrap; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 6px; position: relative; }
         .tab-btn.active { background: #3b82f6; color: white; border-color: #3b82f6; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); }
-        
-        /* 👇 অর্ডার ট্যাবের ওপর কাউন্ট ব্যাজ স্টাইল 👇 */
         .tab-badge { background-color: #ef4444; color: white; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 10px; margin-left: 4px; display: inline-block; box-shadow: 0 2px 5px rgba(239, 68, 68, 0.5); }
         .tab-badge:empty { display: none; }
-
         .tab-content { display: none; animation: fadeIn 0.4s ease; padding: 20px; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -70,7 +67,6 @@
     <!-- Tab Navigation -->
     <div class="admin-tabs">
         <button class="tab-btn active" id="btn-tab-dashboard" onclick="openTab('tab-dashboard', this)"><i class="fa-solid fa-chart-pie"></i> Dashboard</button>
-        <!-- 👇 অর্ডার ট্যাবের সাথে কাউন্ট ব্যাজ যুক্ত করা হলো 👇 -->
         <button class="tab-btn" id="btn-tab-orders" onclick="openTab('tab-orders', this)">
             <i class="fa-solid fa-list-check"></i> Orders & Requests 
             <span id="order-tab-badge" class="tab-badge" style="display: none;">0</span>
@@ -247,7 +243,6 @@
         let pendingOrdersCount = 0;
         let pendingRequestsCount = 0;
 
-        // 👇 ট্যাব ব্যাজ আপডেট করার ফাংশন 👇
         function updateTabBadge() {
             let totalPending = pendingOrdersCount + pendingRequestsCount;
             let badge = document.getElementById('order-tab-badge');
@@ -270,8 +265,8 @@
                         totalOrders++; if(order.status === 'Pending') pendingCount++; if(order.status === 'Completed') revenue += Number(order.price || 0);
                     });
                     
-                    pendingOrdersCount = pendingCount; // সেভ করে রাখা হলো
-                    updateTabBadge(); // ব্যাজ আপডেট
+                    pendingOrdersCount = pendingCount;
+                    updateTabBadge();
 
                     document.getElementById('stat-total-orders').innerText = totalOrders; document.getElementById('stat-pending').innerText = pendingCount; document.getElementById('stat-revenue').innerText = "৳ " + revenue;
                     orders.reverse().forEach(order => {
@@ -306,8 +301,8 @@
                         if(req.status === 'Pending') pendingReqCount++;
                     });
                     
-                    pendingRequestsCount = pendingReqCount; // সেভ করে রাখা হলো
-                    updateTabBadge(); // ব্যাজ আপডেট
+                    pendingRequestsCount = pendingReqCount;
+                    updateTabBadge();
 
                     requests.reverse().forEach(req => {
                         let uId = req.uid || ""; let uName = usersData[uId]?.name || "Guest User"; let uEmail = usersData[uId]?.email || req.userPhone || "No Email Given"; let uPic = usersData[uId]?.profilePic || "https://via.placeholder.com/45/10b981/ffffff?text=U";
@@ -335,9 +330,30 @@
             onValue(ref(db, 'add_money_requests'), (snap) => { requestsSnap = snap; renderRequests(snap); });
 
             let isInitialLoad = true; setTimeout(() => { isInitialLoad = false; }, 2000); 
+            
+            // 👇 নতুন অর্ডার বা রিকোয়েস্ট আসলে নোটিফিকেশন সাউন্ড এবং ভাইব্রেশন ট্রিগার করা হবে 👇
             onChildAdded(ref(db, 'orders'), (snapshot) => { if(!isInitialLoad) { showNotification("🎮 নতুন গেম অর্ডার এসেছে! চেক করুন।"); } });
             onChildAdded(ref(db, 'add_money_requests'), (snapshot) => { if(!isInitialLoad) { showNotification("💰 নতুন অ্যাড মানি রিকোয়েস্ট এসেছে! চেক করুন।"); } });
-            function showNotification(message) { const banner = document.getElementById('notification-banner'); document.getElementById('noti-text').innerText = message; banner.style.display = 'block'; try { let audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3'); audio.play(); } catch(e) {} setTimeout(() => { banner.style.display = 'none'; }, 5000); }
+            
+            function showNotification(message) { 
+                const banner = document.getElementById('notification-banner'); 
+                document.getElementById('noti-text').innerText = message; 
+                banner.style.display = 'block'; 
+                
+                // মোবাইল ফোন ভাইব্রেট করার ফাংশন (যেমন: ২০০ মিলিগ্রাম পরপর দুইবার ভাইব্রেট করবে)
+                if ("vibrate" in navigator) {
+                    try {
+                        navigator.vibrate([200, 100, 200]);
+                    } catch(e) {}
+                }
+
+                try { 
+                    let audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3'); 
+                    audio.play(); 
+                } catch(e) {} 
+                
+                setTimeout(() => { banner.style.display = 'none'; }, 5000); 
+            }
 
             onValue(ref(db, 'homepage_categories'), (snapshot) => {
                 let catContainer = document.getElementById('admin-category-list'); let selectDropdown = document.getElementById('new-pkg-game'); let listsContainer = document.getElementById('dynamic-package-lists'); let catHtml = ''; let selectHtml = ''; let listsHtml = ''; let gameKeys = []; 
