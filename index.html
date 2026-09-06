@@ -38,9 +38,33 @@
         .nav-item { text-align: center; color: #94a3b8; cursor: pointer; font-size: 12px; }
         .nav-item i { font-size: 20px; display: block; margin-bottom: 4px; }
         .nav-item.active { color: #3b82f6; }
+
+        /* 👇 Pull to Refresh Spinner Style 👇 */
+        #refresh-spinner {
+            position: fixed;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1e293b;
+            color: #3b82f6;
+            padding: 8px 16px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            z-index: 99999;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #334155;
+            transition: top 0.3s ease;
+        }
     </style>
 </head>
 <body style="background-color: #0b0f19; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding-bottom: 90px;">
+
+    <!-- Pull to Refresh Indicator -->
+    <div id="refresh-spinner"><i class="fa-solid fa-rotate fa-spin"></i> রিফ্রেশ হচ্ছে...</div>
 
     <!-- Header Section -->
     <header class="app-header" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px;">
@@ -171,7 +195,7 @@
         </div>
     </div> 
 
-    <!-- 👇 Fixed Bottom Navigation 👇 -->
+    <!-- Fixed Bottom Navigation -->
     <nav class="bottom-nav">
         <div class="nav-item active" onclick="window.location.href='index.html'"><i class="fa-solid fa-house"></i><span>Home</span></div>
         <div class="nav-item" onclick="window.location.href='order.html'"><i class="fa-solid fa-clipboard-list"></i><span>Order</span></div>
@@ -207,6 +231,37 @@
             if (!sessionStorage.getItem("noticeShown")) { document.getElementById("noticePopup").style.display = "flex"; }
         });
         function closePopup() { document.getElementById("noticePopup").style.display = "none"; sessionStorage.setItem("noticeShown", "true"); }
+
+        // 👇 Pull to Refresh Touch Logic 👇
+        let touchStartY = 0;
+        const spinner = document.getElementById('refresh-spinner');
+
+        window.addEventListener('touchstart', e => {
+            if (window.scrollY === 0) {
+                touchStartY = e.touches[0].clientY;
+            }
+        });
+
+        window.addEventListener('touchmove', e => {
+            if (window.scrollY === 0) {
+                let touchY = e.touches[0].clientY;
+                let diff = touchY - touchStartY;
+                if (diff > 70 && diff < 150) {
+                    spinner.style.top = '20px';
+                }
+            }
+        });
+
+        window.addEventListener('touchend', e => {
+            if (spinner.style.top === '20px') {
+                spinner.innerHTML = `<i class="fa-solid fa-rotate fa-spin"></i> রিলোড হচ্ছে...`;
+                setTimeout(() => {
+                    window.location.reload();
+                }, 800);
+            } else {
+                spinner.style.top = '-50px';
+            }
+        });
     </script>
 
     <!-- Firebase Script -->
