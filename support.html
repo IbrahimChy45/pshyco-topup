@@ -7,7 +7,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="style.css" rel="stylesheet">
     <style>
-        body { background-color: #0f172a; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding-bottom: 70px; }
+        body { background-color: #0f172a; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding-bottom: 80px; }
         .page-header { display: flex; align-items: center; padding: 20px; background-color: #1e293b; gap: 15px; border-bottom: 1px solid #334155; }
         .page-title { font-size: 18px; font-weight: bold; margin: 0; }
         .support-container { padding: 20px; }
@@ -26,6 +26,16 @@
         .phone { background-color: rgba(245, 158, 11, 0.15); color: #f59e0b; }
         .support-info h4 { margin: 0 0 3px 0; font-size: 15px; }
         .support-info p { margin: 0; font-size: 12px; color: #94a3b8; }
+
+        /* 👇 FAQ Accordion Styles 👇 */
+        .faq-section { margin-top: 35px; }
+        .faq-title { font-size: 16px; font-weight: bold; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; color: #f8fafc; border-left: 4px solid #3b82f6; padding-left: 10px; }
+        .faq-item { background-color: #1e293b; border: 1px solid #334155; border-radius: 10px; margin-bottom: 10px; overflow: hidden; transition: 0.3s; }
+        .faq-question { padding: 15px; font-size: 13px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
+        .faq-question i { color: #3b82f6; transition: transform 0.3s ease; }
+        .faq-answer { max-height: 0; overflow: hidden; padding: 0 15px; font-size: 12px; color: #94a3b8; line-height: 1.6; transition: all 0.3s ease; background-color: rgba(15, 23, 42, 0.3); }
+        .faq-item.active .faq-answer { max-height: 150px; padding: 12px 15px 15px 15px; }
+        .faq-item.active .faq-question i { transform: rotate(180deg); }
     </style>
 </head>
 <body>
@@ -95,6 +105,32 @@
             </a>
 
         </div>
+
+        <!-- 👇 Frequently Asked Questions (FAQ) Section 👇 -->
+        <div class="faq-section">
+            <div class="faq-title"><i class="fa-solid fa-circle-question" style="color: #3b82f6;"></i> Frequently Asked Questions</div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">টাকা কেটেছে কিন্তু ডায়মন্ড পাইনি কেন? <i class="fa-solid fa-chevron-down"></i></div>
+                <div class="faq-answer">সাধারণত সার্ভার ব্যস্ত থাকলে বা সঠিক Player ID না দিলে ডায়মন্ড পৌঁছাতে ৫-১০ মিনিট সময় লাগতে পারে। যদি দীর্ঘসময় ধরে না পান, তবে সঠিক TrxID ও Player ID সহ আমাদের WhatsApp বা Telegram সাপোর্টে যোগাযোগ করুন।</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">অ্যাড মানি (Add Money) করার কতক্ষণ পর ব্যালেন্স যোগ হয়? <i class="fa-solid fa-chevron-down"></i></div>
+                <div class="faq-answer">আপনি bKash বা Nagad-এর মাধ্যমে টাকা পাঠিয়ে সঠিক TrxID ও সঠিক নম্বর দিয়ে রিকোয়েস্ট পাঠানোর পর অ্যাডমিন চেক করে সাধারণত ১-৫ মিনিটের মধ্যে আপনার অ্যাকাউন্টে ব্যালেন্স যোগ করে দেন।</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">রিফান্ড বা অর্ডার ক্যানসেল পলিসি কী? <i class="fa-solid fa-chevron-down"></i></div>
+                <div class="faq-answer">সফলভাবে অর্ডার কমপ্লিট হয়ে গেলে তা আর রিফান্ড বা ক্যানসেল করা সম্ভব নয়। তবে যদি কোনো কারণে আপনার অর্ডারটি 'Rejected' হয়, তবে আপনার পরিশোধকৃত টাকা আপনার অ্যাপ ওয়ালেটে স্বয়ংক্রিয়ভাবে ফেরত দেওয়া হবে।</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">ভুল Player ID তে অর্ডার দিলে কি ডায়মন্ড পাবো? <i class="fa-solid fa-chevron-down"></i></div>
+                <div class="faq-answer">না! ভুল Player ID বা ইনভ্যালিড আইডি দিয়ে অর্ডার সাবমিট করলে ডায়মন্ড অন্য অ্যাকাউন্টে চলে যেতে পারে এবং এর জন্য কর্তৃপক্ষ দায়ী থাকবে না। তাই টপ-আপ করার পূর্বে অবশ্যই Player ID ভালোভাবে চেক করে নিন।</div>
+            </div>
+        </div>
+        <!-- 👆 FAQ Section End 👆 -->
     </div>
 
     <!-- Bottom Navigation Bar -->
@@ -105,7 +141,22 @@
         <div class="nav-item active"><i class="fa-solid fa-headset"></i><span>Support</span></div>
     </nav>
 
-    <!-- 👇 Firebase Script 👇 -->
+    <!-- FAQ Toggle Script -->
+    <script>
+        function toggleFaq(element) {
+            const item = element.parentElement;
+            const isActive = item.classList.contains('active');
+            
+            // সব ক্লোজ করে দেওয়া (ঐচ্ছিক, চাইলে রাখতে পারেন)
+            document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('active'));
+            
+            if (!isActive) {
+                item.classList.add('active');
+            }
+        }
+    </script>
+
+    <!-- Firebase Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -146,11 +197,9 @@
                         if(data.telegram && data.telegram.trim() !== "") {
                             let tgUser = data.telegram.trim().replace('@', ''); // @ রিমুভ করবে
                             
-                            // যদি কেউ ভুল করে লিংক দিয়ে দেয়, সেটা সামলানোর জন্য
                             if(tgUser.startsWith('http') || tgUser.startsWith('t.me')) {
                                 document.getElementById('tg-link').href = tgUser.startsWith('http') ? tgUser : 'https://' + tgUser;
                             } else {
-                                // শুধু ইউজারনেম দিলে অটোমেটিক লিংক বানিয়ে নেবে
                                 document.getElementById('tg-link').href = "https://t.me/" + tgUser;
                             }
                         }
