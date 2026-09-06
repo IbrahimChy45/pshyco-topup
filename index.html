@@ -88,14 +88,43 @@
             <p style="grid-column: span 3; text-align: center; color: #94a3b8; font-size: 12px;">Loading games...</p>
         </div>
 
+        <!-- 👇 Hot Offers with Flash Sale Timer 👇 -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 25px; margin-bottom: 15px;">
-            <h3 style="margin: 0; font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 6px;">
-                <i class="fa-solid fa-fire-flame-curved" style="color: #ef4444;"></i> HOT OFFERS
-            </h3>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <h3 style="margin: 0; font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-fire-flame-curved" style="color: #ef4444;"></i> HOT OFFERS
+                </h3>
+                
+                <!-- Timer Badges -->
+                <div style="display: flex; gap: 4px; align-items: center;">
+                    <div style="background: #ef4444; color: white; padding: 3px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; box-shadow: 0 2px 5px rgba(239, 68, 68, 0.4);" id="flash-hrs">00</div><span style="color: #ef4444; font-weight: bold; font-size: 12px;">:</span>
+                    <div style="background: #ef4444; color: white; padding: 3px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; box-shadow: 0 2px 5px rgba(239, 68, 68, 0.4);" id="flash-mins">00</div><span style="color: #ef4444; font-weight: bold; font-size: 12px;">:</span>
+                    <div style="background: #ef4444; color: white; padding: 3px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; box-shadow: 0 2px 5px rgba(239, 68, 68, 0.4);" id="flash-secs">00</div>
+                </div>
+            </div>
             <a href="#" style="color: #3b82f6; font-size: 12px; text-decoration: none; font-weight: bold;">View All ></a>
         </div>
 
-        <!-- 👇 Dynamic Hot Offers List 👇 -->
+        <script>
+            // Flash Sale Timer Logic (Ends at midnight everyday)
+            function updateFlashTimer() {
+                const now = new Date();
+                const midnight = new Date();
+                midnight.setHours(24, 0, 0, 0); 
+                let diff = midnight - now;
+                let h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                let m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                let s = Math.floor((diff % (1000 * 60)) / 1000);
+                document.getElementById('flash-hrs').innerText = h.toString().padStart(2, '0');
+                document.getElementById('flash-mins').innerText = m.toString().padStart(2, '0');
+                document.getElementById('flash-secs').innerText = s.toString().padStart(2, '0');
+            }
+            setInterval(updateFlashTimer, 1000);
+            updateFlashTimer();
+        </script>
+        <!-- 👆 Flash Sale Timer Logic End 👆 -->
+
+        <!-- Dynamic Hot Offers List -->
         <div id="dynamic-hot-offers" style="display: flex; flex-direction: column; gap: 15px;">
             <p style="text-align: center; color: #94a3b8; font-size: 12px;">Loading offers...</p>
         </div>
@@ -231,7 +260,7 @@
             } else { window.location.href = "login.html"; }
         });
 
-        // 👇 Maintenance Mode Checking Logic 👇
+        // Maintenance Mode Checking Logic
         onValue(ref(db, 'settings/maintenance'), (snapshot) => {
             const overlay = document.getElementById('maintenance-overlay');
             const msgText = document.getElementById('maintenance-message');
@@ -240,10 +269,10 @@
                 if(data.status === true) {
                     if(data.message) msgText.innerText = data.message;
                     overlay.style.display = 'flex';
-                    document.body.style.overflow = 'hidden'; // স্ক্রলিং বন্ধ
+                    document.body.style.overflow = 'hidden'; 
                 } else {
                     overlay.style.display = 'none';
-                    document.body.style.overflow = 'auto'; // স্ক্রলিং চালু
+                    document.body.style.overflow = 'auto'; 
                 }
             }
         });
