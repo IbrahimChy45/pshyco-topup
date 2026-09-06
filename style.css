@@ -11,9 +11,9 @@
 /* =========================================
    BODY & HTML HEIGHT FIX (খুব জরুরি)
 ========================================= */
-html, body {
+html {
+    background-color: #0b0e14;
     height: 100%;
-    min-height: 100vh; /* এটি পেজকে সবসময় ফুল-স্ক্রিন লম্বা রাখবে */
 }
 
 body {
@@ -22,7 +22,7 @@ body {
     /* মেনুর নিচে যাতে কোনো কন্টেন্ট না ঢোকে তাই প্যাডিং বাড়ানো হয়েছে */
     padding-bottom: 100px !important; 
     margin: 0 !important;
-    position: relative;
+    min-height: 100vh;
 }
 
 /* Header */
