@@ -20,6 +20,12 @@
         .avatar-container .edit-badge { position: absolute; bottom: 5px; right: 0; background: #3b82f6; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 12px; border: 2px solid #0b0f19; }
         .name-edit-icon { font-size: 13px; color: #94a3b8; cursor: pointer; margin-left: 5px; }
 
+        /* 👇 VIP Tier Badge Design 👇 */
+        .vip-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .vip-bronze { background: rgba(205, 127, 50, 0.15); color: #cd7f32; border: 1px solid rgba(205, 127, 50, 0.4); }
+        .vip-silver { background: rgba(192, 192, 192, 0.15); color: #e2e8f0; border: 1px solid rgba(192, 192, 192, 0.4); }
+        .vip-gold { background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.4); box-shadow: 0 0 10px rgba(234, 179, 8, 0.2); }
+
         /* 👇 ক্রপ করার পপ-আপ (Modal) এর ডিজাইন 👇 */
         #crop-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.95); z-index: 100000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; backdrop-filter: blur(5px); }
         #image-container { width: 100%; max-width: 400px; max-height: 60vh; background: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
@@ -61,7 +67,12 @@
             <div class="edit-badge"><i class="fa-solid fa-camera"></i></div>
         </div>
 
-        <h3 style="margin: 15px 0 5px 0; font-size: 20px; display: flex; justify-content: center; align-items: center;">
+        <!-- 👇 VIP Tier Badge Display 👇 -->
+        <div id="vip-tier-box" style="margin-top: 12px;">
+            <span id="vip-tier-tag" class="vip-badge vip-bronze"><i class="fa-solid fa-medal"></i> Bronze Member</span>
+        </div>
+
+        <h3 style="margin: 5px 0 5px 0; font-size: 20px; display: flex; justify-content: center; align-items: center;">
             <span id="user-name">Loading...</span> 
             <i class="fa-solid fa-pen name-edit-icon" id="edit-name-btn"></i>
         </h3>
@@ -134,8 +145,8 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
         
-        let cropper = null; // ক্রপ করার টুল
-        let globalUser = null; // গ্লোবাল ইউজার
+        let cropper = null; 
+        let globalUser = null; 
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -166,6 +177,38 @@
                     }
                 });
 
+                // 👇 মোট অর্ডার ও খরচ হিসাব করে VIP Tier সেট করা 👇
+                const userOrdersRef = query(ref(db, 'orders'), orderByChild('uid'), equalTo(user.uid));
+                onValue(userOrdersRef, (snapshot) => {
+                    let totalOrders = 0;
+                    let totalSpent = 0;
+                    
+                    if (snapshot.exists()) {
+                        totalOrders = snapshot.size;
+                        snapshot.forEach(child => {
+                            let order = child.val();
+                            if(order.status === 'Completed' && order.price) {
+                                totalSpent += Number(order.price);
+                            }
+                        });
+                    }
+                    
+                    document.getElementById("total-orders-count").innerText = totalOrders;
+
+                    // VIP Tiers Logic (Gold: ৳1000+ বা ১০+ অর্ডার, Silver: ৳500+ বা ৫+ অর্ডার, অন্যথায় Bronze)
+                    let tierTag = document.getElementById('vip-tier-tag');
+                    if (totalSpent >= 1000 || totalOrders >= 10) {
+                        tierTag.className = 'vip-badge vip-gold';
+                        tierTag.innerHTML = `<i class="fa-solid fa-crown"></i> Gold VIP Member`;
+                    } else if (totalSpent >= 500 || totalOrders >= 5) {
+                        tierTag.className = 'vip-badge vip-silver';
+                        tierTag.innerHTML = `<i class="fa-solid fa-award"></i> Silver VIP Member`;
+                    } else {
+                        tierTag.className = 'vip-badge vip-bronze';
+                        tierTag.innerHTML = `<i class="fa-solid fa-medal"></i> Bronze Member`;
+                    }
+                });
+
                 document.getElementById('edit-name-btn').addEventListener('click', () => {
                     let currentName = document.getElementById('user-name').innerText;
                     let newName = prompt("আপনার নতুন নাম লিখুন:", currentName);
@@ -174,12 +217,6 @@
                         .then(() => alert("নাম আপডেট করা হয়েছে!"))
                         .catch(err => alert("Error: " + err.message));
                     }
-                });
-
-                const userOrdersRef = query(ref(db, 'orders'), orderByChild('uid'), equalTo(user.uid));
-                onValue(userOrdersRef, (snapshot) => {
-                    if (snapshot.exists()) { document.getElementById("total-orders-count").innerText = snapshot.size; } 
-                    else { document.getElementById("total-orders-count").innerText = "0"; }
                 });
 
                 const historyRef = query(ref(db, 'add_money_requests'), orderByChild('uid'), equalTo(user.uid));
@@ -226,11 +263,10 @@
             reader.onload = (event) => {
                 document.getElementById('image-to-crop').src = event.target.result;
                 document.getElementById('crop-modal').style.display = 'flex';
-                document.body.style.overflow = 'hidden'; // স্ক্রল বন্ধ
+                document.body.style.overflow = 'hidden'; 
 
-                if (cropper) cropper.destroy(); // পুরনো ক্রপার ডিলিট
+                if (cropper) cropper.destroy(); 
                 
-                // নতুন ক্রপার তৈরি (1:1 Square সাইজের জন্য)
                 cropper = new Cropper(document.getElementById('image-to-crop'), {
                     aspectRatio: 1, 
                     viewMode: 1,
@@ -239,17 +275,15 @@
                 });
             };
             reader.readAsDataURL(file);
-            e.target.value = ''; // Reset input
+            e.target.value = ''; 
         });
 
-        // Cancel Crop Button
         document.getElementById('cancel-crop').addEventListener('click', () => {
             document.getElementById('crop-modal').style.display = 'none';
-            document.body.style.overflow = 'auto'; // স্ক্রল চালু
+            document.body.style.overflow = 'auto'; 
             if (cropper) cropper.destroy();
         });
 
-        // Save Crop Button
         document.getElementById('save-crop').addEventListener('click', () => {
             if (!cropper || !globalUser) return;
             
@@ -258,11 +292,10 @@
             btn.innerHTML = 'Saving...';
             btn.disabled = true;
 
-            // ক্রপ করা অংশ থেকে ২৫০x২৫০ সাইজের ক্যানভাস নেওয়া
             const canvas = cropper.getCroppedCanvas({ width: 250, height: 250 });
             if (!canvas) return;
 
-            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8); // 80% Quality
+            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8); 
             
             update(ref(db, 'users/' + globalUser.uid), { profilePic: compressedBase64 })
             .then(() => {
