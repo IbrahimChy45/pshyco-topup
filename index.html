@@ -7,6 +7,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="style.css" rel="stylesheet">
     
+    <!-- 👇 ম্যাজিক এনিমেশন কোড 👇 -->
     <style>
         body { animation: pageLoad 0.4s ease-out forwards; }
         @keyframes pageLoad { 
@@ -14,6 +15,7 @@
             100% { opacity: 1; transform: translateY(0); } 
         }
         
+        /* বাটনে ক্লিক করলে দেবে যাওয়ার এনিমেশন */
         .games-grid > div:active, 
         #dynamic-hot-offers > div:active,
         .nav-item:active, 
@@ -22,6 +24,7 @@
             transition: transform 0.1s ease !important; 
         }
     </style>
+    <!-- 👆 ম্যাজিক এনিমেশন শেষ 👆 -->
 </head>
 <body style="background-color: #0b0f19; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding-bottom: 80px;">
 
@@ -92,7 +95,7 @@
                     <i class="fa-solid fa-fire-flame-curved" style="color: #ef4444;"></i> HOT OFFERS
                 </h3>
                 
-                <!-- 👇 Timer Badges with ID for Control 👇 -->
+                <!-- Timer Badges with ID for Control -->
                 <div id="flash-timer-container" style="display: flex; gap: 4px; align-items: center;">
                     <div style="background: #ef4444; color: white; padding: 3px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; box-shadow: 0 2px 5px rgba(239, 68, 68, 0.4);" id="flash-hrs">00</div><span style="color: #ef4444; font-weight: bold; font-size: 12px;">:</span>
                     <div style="background: #ef4444; color: white; padding: 3px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; box-shadow: 0 2px 5px rgba(239, 68, 68, 0.4);" id="flash-mins">00</div><span style="color: #ef4444; font-weight: bold; font-size: 12px;">:</span>
@@ -115,6 +118,31 @@
         <div id="dynamic-hot-offers" style="display: flex; flex-direction: column; gap: 15px;">
             <p style="text-align: center; color: #94a3b8; font-size: 12px;">Loading offers...</p>
         </div>
+
+        <!-- 👇 Trust & Security Badges 👇 -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 30px;">
+            <div style="background-color: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 15px 5px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
+                <div style="background: rgba(16, 185, 129, 0.1); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(16, 185, 129, 0.3);">
+                    <i class="fa-solid fa-shield-halved" style="color: #10b981; font-size: 18px;"></i>
+                </div>
+                <p style="margin: 0; font-size: 10px; font-weight: bold; color: #e2e8f0; line-height: 1.3;">100% Secure<br><span style="color: #94a3b8; font-size: 8px; font-weight: normal;">Safe Payment</span></p>
+            </div>
+            
+            <div style="background-color: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 15px 5px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
+                <div style="background: rgba(245, 158, 11, 0.1); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(245, 158, 11, 0.3);">
+                    <i class="fa-solid fa-bolt" style="color: #f59e0b; font-size: 18px;"></i>
+                </div>
+                <p style="margin: 0; font-size: 10px; font-weight: bold; color: #e2e8f0; line-height: 1.3;">Fast Delivery<br><span style="color: #94a3b8; font-size: 8px; font-weight: normal;">Instant Top Up</span></p>
+            </div>
+            
+            <div style="background-color: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 15px 5px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
+                <div style="background: rgba(59, 130, 246, 0.1); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(59, 130, 246, 0.3);">
+                    <i class="fa-solid fa-headset" style="color: #3b82f6; font-size: 18px;"></i>
+                </div>
+                <p style="margin: 0; font-size: 10px; font-weight: bold; color: #e2e8f0; line-height: 1.3;">24/7 Support<br><span style="color: #94a3b8; font-size: 8px; font-weight: normal;">Always Here</span></p>
+            </div>
+        </div>
+        <!-- 👆 Trust & Security Badges End 👆 -->
 
         <div style="margin-top: 35px; margin-bottom: 10px; padding-bottom: 20px;">
             <h3 style="margin: 0 0 15px 0; font-size: 14px; font-weight: bold; text-transform: uppercase;">Stay Connected</h3>
@@ -258,7 +286,7 @@
             }
         });
 
-        // 👇 Timer Remote Control Receiver 👇
+        // Timer Remote Control Receiver
         onValue(ref(db, 'settings/timer_status'), (snapshot) => {
             const timerContainer = document.getElementById('flash-timer-container');
             if(snapshot.exists()) {
