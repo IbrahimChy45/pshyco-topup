@@ -11,8 +11,11 @@
         .logo { font-size: 18px; font-weight: bold; color: white; display: flex; align-items: center; gap: 8px; }
         .logo span { color: #3b82f6; }
         .header-right-group { display: flex; align-items: center; gap: 10px; }
+        
+        /* 👇 একদম ছোট এবং সুন্দর সাউন্ড এনেবল বাটন স্টাইল 👇 */
         .sound-enable-btn { background-color: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
         .sound-enable-btn.enabled { background-color: rgba(16, 185, 129, 0.15); color: #34d399; border-color: rgba(16, 185, 129, 0.4); }
+
         .logout-btn { background-color: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; }
         .admin-tabs { display: flex; overflow-x: auto; background-color: #151b29; padding: 12px 15px; gap: 10px; position: sticky; top: 55px; z-index: 90; border-bottom: 1px solid #2a3449; scroll-behavior: smooth; }
         .admin-tabs::-webkit-scrollbar { display: none; }
@@ -43,8 +46,10 @@
         .stat-icon { width: 45px; height: 45px; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 20px; }
         .stat-info h3, .stat-info b { margin: 0; font-size: 20px; }
         .stat-info p { margin: 0; font-size: 12px; color: #94a3b8; }
+        
         #notification-banner { display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background-color: #3b82f6; color: white; padding: 15px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 9999; text-align: center; font-weight: bold; font-size: 14px; animation: slideDown 0.5s ease-out forwards; cursor: pointer; border: 2px solid #60a5fa; }
         @keyframes slideDown { 0% { top: -50px; opacity: 0; } 100% { top: 20px; opacity: 1; } }
+
         .user-card { display: flex; align-items: center; gap: 12px; background: rgba(15, 23, 42, 0.8); padding: 12px; border-radius: 10px; border: 1px solid #3b82f6; margin-bottom: 15px; box-shadow: inset 0 0 10px rgba(59,130,246,0.1); }
         .user-card img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid #3b82f6; object-fit: cover; background: #0b0f19; }
         .user-card div { display: flex; flex-direction: column; gap: 3px; }
@@ -63,6 +68,7 @@
     <header class="admin-header">
         <div class="logo"><i class="fa-solid fa-user-shield" style="color: #3b82f6;"></i> Admin<span>Panel</span></div>
         <div class="header-right-group">
+            <!-- 👇 খুব ছোট সাউন্ড পারমিশন বাটন 👇 -->
             <button id="soundToggleBtn" class="sound-enable-btn" onclick="enableAudioAndVibration()">
                 <i class="fa-solid fa-volume-xmark"></i> Sound Off
             </button>
@@ -112,6 +118,7 @@
 
     <!-- TAB 3: APP CONTENT -->
     <div id="tab-content" class="tab-content">
+        <!-- Homepage Games -->
         <div class="admin-section">
             <h3 class="section-title"><i class="fa-solid fa-layer-group" style="color: #f59e0b;"></i> 1. Homepage Games</h3>
             <input type="text" id="cat-title" class="input-dark" placeholder="Game Title (e.g. Call of Duty)">
@@ -122,6 +129,7 @@
             <div id="admin-category-list" style="display: grid; gap: 10px; max-height: 250px; overflow-y: auto;"></div>
         </div>
 
+        <!-- Manage Packages -->
         <div class="admin-section">
             <h3 class="section-title"><i class="fa-solid fa-tags" style="color: #3b82f6;"></i> 2. Manage Packages</h3>
             <select id="new-pkg-game" class="input-dark" style="margin-bottom: 15px; border-color: #3b82f6;">
@@ -134,8 +142,10 @@
             <div id="dynamic-package-lists" style="max-height: 400px; overflow-y: auto;"><div class="empty-msg">Loading packages...</div></div>
         </div>
 
+        <!-- Hot Offers & Timer Control -->
         <div class="admin-section">
             <h3 class="section-title"><i class="fa-solid fa-fire" style="color: #ef4444;"></i> Hot Offers & Timer</h3>
+            
             <div style="background: rgba(239, 68, 68, 0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.2); margin-bottom: 15px;">
                 <p style="font-size: 12px; color: #cbd5e1; margin: 0 0 10px 0;">ফ্ল্যাশ সেল টাইমার (হোমপেজ)</p>
                 <div style="display: flex; gap: 10px;">
@@ -144,6 +154,7 @@
                 </div>
                 <p id="timer-status-text" style="font-size: 12px; font-weight: bold; margin-top: 10px; color: #10b981;">Current Status: 🟢 ON</p>
             </div>
+
             <input type="text" id="offer-title" class="input-dark" placeholder="Offer Title">
             <input type="text" id="offer-subtitle" class="input-dark" placeholder="Subtitle">
             <input type="number" id="offer-old-price" class="input-dark" placeholder="Regular Price (Optional)">
@@ -218,6 +229,7 @@
             }
         });
 
+        // 👇 অডিও পারমিশন এনেবল ফাংশন 👇
         let audioUnlocked = false;
         function enableAudioAndVibration() {
             let audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2870/2870-preview.mp3');
@@ -236,12 +248,11 @@
         }
     </script>
 
-    <!-- Firebase Admin & FCM Logic -->
+    <!-- Firebase Admin Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getDatabase, ref, onValue, update, get, set, remove, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyD2d_najqnMXstfTvjlR6_4kffh5axIasY",
@@ -256,26 +267,6 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
-        const messaging = getMessaging(app);
-
-        // 👇 ব্রাউজারে নোটিফিকেশনের অনুমতি চাওয়া এবং আপনার আসল VAPID Key সহ FCM টোকেন সেভ করা 👇
-        Notification.requestPermission().then((permission) => {
-            if (permission === 'granted') {
-                getToken(messaging, { vapidKey: 'BGEo2gDYcr6ZRUBHsyGrVB6dkJp6QhuzxHIDl4ug13YR4b5N-aJIq5e9AFM3lBrAPoI1uUKOJV3WWNe1WMK32tA' }).then((currentToken) => {
-                    if (currentToken) {
-                        set(ref(db, 'settings/admin_fcm_token'), currentToken);
-                        console.log("FCM Token Saved Successfully!");
-                    }
-                }).catch((err) => {
-                    console.log('Error getting token: ', err);
-                });
-            }
-        });
-
-        // ফোরগ্রাউন্ড মেসেজ হ্যান্ডলিং
-        onMessage(messaging, (payload) => {
-            showNotification(payload.notification.title + "\n" + payload.notification.body);
-        });
 
         onAuthStateChanged(auth, (user) => { if (user) fetchAdminData(); else window.location.href = "login.html"; });
 
@@ -378,10 +369,12 @@
                 document.getElementById('noti-text').innerText = message; 
                 banner.style.display = 'block'; 
                 
+                // ভাইব্রেশন
                 if ("vibrate" in navigator) {
                     try { navigator.vibrate([200, 100, 200, 100, 200]); } catch(e) {}
                 }
 
+                // সাউন্ড বা রিংটোন বাজানো
                 try { 
                     let audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2870/2870-preview.mp3'); 
                     audio.play(); 
