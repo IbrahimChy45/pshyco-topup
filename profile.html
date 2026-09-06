@@ -46,12 +46,16 @@
         <!-- Email & Phone Show -->
         <p id="user-email" style="margin: 0 0 5px 0; font-size: 12px; color: #3b82f6; font-weight: bold;">Loading Email...</p>
         <p id="user-phone" style="margin: 0 0 5px 0; font-size: 11px; color: #94a3b8;">Phone: Loading...</p>
-        
         <p id="user-uid" style="margin: 0; font-size: 11px; color: #64748b;">UID: Loading...</p>
+        
+        <!-- 👇 Joined Date Badge যুক্ত করা হয়েছে 👇 -->
+        <p id="user-joined" style="margin: 8px 0 0 0; font-size: 11px; color: #10b981; font-weight: bold; background: rgba(16, 185, 129, 0.1); display: inline-block; padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.3);">
+            <i class="fa-solid fa-calendar-days"></i> Joined: Loading...
+        </p>
     </div>
 
     <!-- Stats Section -->
-    <div style="padding: 0 20px; margin-top: -15px;">
+    <div style="padding: 0 20px; margin-top: -10px;">
         <div style="background-color: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; display: flex; justify-content: space-around; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
             <div>
                 <i class="fa-solid fa-wallet" style="color: #3b82f6; font-size: 24px; margin-bottom: 8px;"></i>
@@ -112,10 +116,8 @@
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // ১. বেসিক ইনফো সেট করা
                 document.getElementById("user-uid").innerText = "UID: " + user.uid;
                 
-                // ২. ইউজারের ডাটা ফেচ করা (Name, Email, Profile Pic, Balance)
                 const userRef = ref(db, 'users/' + user.uid);
                 onValue(userRef, (snapshot) => {
                     if (snapshot.exists()) {
@@ -132,14 +134,24 @@
                         } else {
                             document.getElementById("profile-balance").innerText = "0৳";
                         }
+
+                        // 👇 Joined Date Formatting Logic 👇
+                        if (data.joined) {
+                            let joinDate = new Date(data.joined);
+                            let formattedJoinDate = joinDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                            document.getElementById("user-joined").innerHTML = `<i class="fa-solid fa-calendar-days"></i> Joined: ${formattedJoinDate}`;
+                        } else {
+                            document.getElementById("user-joined").innerHTML = `<i class="fa-solid fa-calendar-days"></i> Joined: Old Account`;
+                        }
+
                     } else {
                         document.getElementById("user-name").innerText = "Unknown User";
                         document.getElementById("user-email").innerText = user.email || "No Email";
                         document.getElementById("profile-balance").innerText = "0৳";
+                        document.getElementById("user-joined").innerHTML = `<i class="fa-solid fa-calendar-days"></i> Joined: Unknown`;
                     }
                 });
 
-                // ৩. ইউজারের নাম আপডেট করা
                 document.getElementById('edit-name-btn').addEventListener('click', () => {
                     let currentName = document.getElementById('user-name').innerText;
                     let newName = prompt("আপনার নতুন নাম লিখুন:", currentName);
@@ -150,7 +162,6 @@
                     }
                 });
 
-                // ৪. প্রোফাইল পিকচার আপলোড ও কম্প্রেস করা
                 document.getElementById('pic-upload').addEventListener('change', (e) => {
                     const file = e.target.files[0];
                     if(!file) return;
@@ -160,7 +171,7 @@
                         const img = new Image();
                         img.onload = () => {
                             const canvas = document.createElement('canvas');
-                            const MAX_SIZE = 250; // ছবি রিসাইজ করে 250px করা হবে
+                            const MAX_SIZE = 250; 
                             let width = img.width; let height = img.height;
                             
                             if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } }
@@ -170,7 +181,7 @@
                             const ctx = canvas.getContext('2d');
                             ctx.drawImage(img, 0, 0, width, height);
                             
-                            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7); // 70% Quality
+                            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7); 
                             
                             update(ref(db, 'users/' + user.uid), { profilePic: compressedBase64 })
                             .then(() => alert("Profile Picture Updated!"))
@@ -181,7 +192,6 @@
                     reader.readAsDataURL(file);
                 });
 
-                // ৫. ইউজারের Total Orders কাউন্ট করা
                 const userOrdersRef = query(ref(db, 'orders'), orderByChild('uid'), equalTo(user.uid));
                 onValue(userOrdersRef, (snapshot) => {
                     if (snapshot.exists()) {
@@ -191,7 +201,6 @@
                     }
                 });
 
-                // ৬. ইউজারের Add Money History লোড করা
                 const historyRef = query(ref(db, 'add_money_requests'), orderByChild('uid'), equalTo(user.uid));
                 onValue(historyRef, (snapshot) => {
                     const historyList = document.getElementById("history-list");
