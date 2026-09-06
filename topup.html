@@ -6,7 +6,6 @@
     <title>Game Top Up</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* 👇 ম্যাজিক এনিমেশন ও ভ্যালিডেশন স্টাইল 👇 */
         body { background-color: #0b0f19; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding-bottom: 80px; animation: pageLoad 0.4s ease-out forwards; }
         @keyframes pageLoad { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
         .pkg-card:active, .nav-item:active, .submit-btn:active, .back-btn:active { transform: scale(0.92) !important; transition: transform 0.1s ease !important; }
@@ -21,10 +20,14 @@
         .input-box { position: relative; width: 100%; }
         .input-box input { width: 100%; background-color: #151b29; border: 1px solid #2a3449; color: white; padding: 14px 15px; border-radius: 10px; box-sizing: border-box; font-size: 14px; outline: none; transition: 0.3s; }
         .input-box input:focus { border-color: #3b82f6; }
-        
-        /* 👇 ইনভ্যালিড হলে ইনপুট বক্স লাল করার স্টাইল 👇 */
         .input-box input.invalid { border-color: #ef4444 !important; background-color: rgba(239, 68, 68, 0.05); }
         .error-msg { color: #ef4444; font-size: 11px; margin-top: 5px; display: none; font-weight: 600; }
+
+        /* 👇 সেভড আইডি চিপস ডিজাইন 👇 */
+        .saved-ids-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+        .saved-id-chip { background-color: #1e293b; border: 1px solid #334155; color: #94a3b8; padding: 5px 10px; border-radius: 15px; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
+        .saved-id-chip:hover { border-color: #3b82f6; color: white; background-color: rgba(59, 130, 246, 0.1); }
+        .saved-id-chip i { color: #3b82f6; font-size: 10px; }
 
         .package-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
         .pkg-card { background-color: #151b29; border: 1.5px solid #2a3449; border-radius: 10px; padding: 15px 5px; text-align: center; cursor: pointer; position: relative; transition: 0.3s; }
@@ -69,7 +72,10 @@
             <div id="error-msg" class="error-msg">Invalid Player ID</div>
         </div>
         
-        <label class="section-label">Player Name (optional)</label>
+        <!-- 👇 সেভড আইডি দেখানোর জায়গা 👇 -->
+        <div id="saved-ids-box" class="saved-ids-container" style="display: none;"></div>
+        
+        <label class="section-label" style="margin-top: 15px;">Player Name (optional)</label>
         <div class="input-box"><input type="text" id="playerName" placeholder="Enter Player Name"></div>
         
         <label class="section-label">SELECT PACKAGE <i class="fa-solid fa-bolt" style="color: #3b82f6;"></i></label>
@@ -106,7 +112,44 @@
         window.selectedDiamond = ""; window.selectedPrice = 0; window.selectedPkgName = "";
         window.isIdValid = false;
 
-        // 👇 গেম ভেদে আইডি ভ্যালিডেশন লজিক 👇
+        // 👇 সেভড আইডি রেন্ডার করার ফাংশন 👇
+        function renderSavedIds() {
+            let storageKey = 'saved_ids_' + dbNode;
+            let savedIds = JSON.parse(localStorage.getItem(storageKey)) || [];
+            let container = document.getElementById('saved-ids-box');
+            
+            if (savedIds.length > 0) {
+                container.style.display = 'flex';
+                container.innerHTML = '<span style="font-size: 10px; color: #64748b; width: 100%; margin-bottom: -2px;">Saved IDs (Click to use):</span>';
+                savedIds.forEach(id => {
+                    let chip = document.createElement('div');
+                    chip.className = 'saved-id-chip';
+                    chip.innerHTML = `<i class="fa-solid fa-clock-rotate-left"></i> ${id}`;
+                    chip.onclick = function() {
+                        document.getElementById('playerUid').value = id;
+                        validatePlayerId();
+                    };
+                    container.appendChild(chip);
+                });
+            } else {
+                container.style.display = 'none';
+            }
+        }
+
+        // পেজ লোড হওয়ার সাথে সাথে সেভড আইডি চেক করা
+        window.addEventListener('DOMContentLoaded', renderSavedIds);
+
+        // আইডি সেভ করার ফাংশন
+        function savePlayerId(id) {
+            let storageKey = 'saved_ids_' + dbNode;
+            let savedIds = JSON.parse(localStorage.getItem(storageKey)) || [];
+            if (!savedIds.includes(id)) {
+                savedIds.unshift(id); // নতুন আইডি সবার উপরে যোগ হবে
+                if (savedIds.length > 4) savedIds.pop(); // সর্বোচ্চ ৪টি আইডি সেভ থাকবে
+                localStorage.setItem(storageKey, JSON.stringify(savedIds));
+            }
+        }
+
         window.validatePlayerId = function() {
             let uidInput = document.getElementById('playerUid');
             let errorDiv = document.getElementById('error-msg');
@@ -117,20 +160,16 @@
 
             if (val.length === 0) {
                 isValid = false;
-                errorDiv.style.display = 'none'; // খালি থাকলে লাল দেখাবে না, শুধু সাবমিট আটকাবে
+                errorDiv.style.display = 'none';
                 uidInput.classList.remove('invalid');
             } else {
                 if (gName.includes('free fire')) {
-                    // ফ্রি ফায়ার আইডি সাধারণত ৮ থেকে ১০ ডিজিটের হয়
                     if (!/^\d{8,10}$/.test(val)) { isValid = false; }
                 } else if (gName.includes('pubg')) {
-                    // পাবজি আইডি সাধারণত ৮ থেকে ১১ ডিজিটের হয়
                     if (!/^\d{8,11}$/.test(val)) { isValid = false; }
                 } else if (gName.includes('call of duty') || gName.includes('cod')) {
-                    // কল অব ডিউটি আইডি সাধারণত ৮ থেকে ১২ ডিজিট বা অক্ষর হতে পারে
                     if (val.length < 6 || val.length > 15) { isValid = false; }
                 } else {
-                    // ডিফল্ট জেনেরিক চেক (কমপক্ষে ৬ ডিজিট)
                     if (val.length < 5) { isValid = false; }
                 }
 
@@ -145,6 +184,14 @@
             }
 
             window.isIdValid = isValid;
+            
+            // প্যাকেজ সিলেক্ট করা থাকলে এবং আইডি ভ্যালিড হলে বাটন অন হবে
+            let btn = document.getElementById('submit-btn');
+            if(window.selectedPrice > 0 && window.isIdValid) {
+                btn.disabled = false;
+            } else {
+                btn.disabled = true;
+            }
         }
 
         window.selectPackage = function(element, diamond, price, pkgName) {
@@ -153,7 +200,6 @@
             
             let btn = document.getElementById('submit-btn'); 
             btn.innerText = `PAY ৳${price} FROM WALLET`; 
-            // যদি আইডি ভ্যালিড হয় তবেই বাটন সচল হবে
             btn.disabled = !window.isIdValid;
         }
     </script>
@@ -211,6 +257,9 @@
             if (currentBalance < window.selectedPrice) { alert("Insufficient balance! Please Add Money."); window.location.href = "addmoney.html"; return; }
             let submitBtn = document.getElementById('submit-btn'); submitBtn.innerText = "Processing..."; submitBtn.disabled = true;
             try {
+                // সফল অর্ডার হলে আইডি সেভ করে নেওয়া
+                savePlayerId(uid);
+
                 await update(ref(db, 'users/' + currentUser.uid), { balance: currentBalance - window.selectedPrice });
                 
                 const orderData = { 
