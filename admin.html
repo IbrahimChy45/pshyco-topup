@@ -10,6 +10,12 @@
         .admin-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background-color: #1e293b; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid #334155; }
         .logo { font-size: 18px; font-weight: bold; color: white; display: flex; align-items: center; gap: 8px; }
         .logo span { color: #3b82f6; }
+        .header-right-group { display: flex; align-items: center; gap: 10px; }
+        
+        /* 👇 একদম ছোট এবং সুন্দর সাউন্ড এনেবল বাটন স্টাইল 👇 */
+        .sound-enable-btn { background-color: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
+        .sound-enable-btn.enabled { background-color: rgba(16, 185, 129, 0.15); color: #34d399; border-color: rgba(16, 185, 129, 0.4); }
+
         .logout-btn { background-color: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; }
         .admin-tabs { display: flex; overflow-x: auto; background-color: #151b29; padding: 12px 15px; gap: 10px; position: sticky; top: 55px; z-index: 90; border-bottom: 1px solid #2a3449; scroll-behavior: smooth; }
         .admin-tabs::-webkit-scrollbar { display: none; }
@@ -61,7 +67,13 @@
     <!-- Header -->
     <header class="admin-header">
         <div class="logo"><i class="fa-solid fa-user-shield" style="color: #3b82f6;"></i> Admin<span>Panel</span></div>
-        <div class="logout-btn" onclick="window.location.href='index.html'"><i class="fa-solid fa-right-from-bracket"></i> Logout</div>
+        <div class="header-right-group">
+            <!-- 👇 খুব ছোট সাউন্ড পারমিশন বাটন 👇 -->
+            <button id="soundToggleBtn" class="sound-enable-btn" onclick="enableAudioAndVibration()">
+                <i class="fa-solid fa-volume-xmark"></i> Sound Off
+            </button>
+            <div class="logout-btn" onclick="window.location.href='index.html'"><i class="fa-solid fa-right-from-bracket"></i> Logout</div>
+        </div>
     </header>
 
     <!-- Tab Navigation -->
@@ -216,6 +228,24 @@
                 else if (diff < 0 && currentIndex > 0) { openTab(tabIds[currentIndex - 1], document.getElementById(btnIds[currentIndex - 1])); document.getElementById(btnIds[currentIndex - 1]).scrollIntoView({ behavior: 'smooth', inline: 'center' }); }
             }
         });
+
+        // 👇 অডিও পারমিশন এনেবল ফাংশন 👇
+        let audioUnlocked = false;
+        function enableAudioAndVibration() {
+            let audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2870/2870-preview.mp3');
+            audio.play().then(() => {
+                audioUnlocked = true;
+                let btn = document.getElementById('soundToggleBtn');
+                btn.innerHTML = '<i class="fa-solid fa-volume-high"></i> Sound On';
+                btn.className = 'sound-enable-btn enabled';
+            }).catch(e => {
+                alert("Please interact again to enable sound!");
+            });
+
+            if ("vibrate" in navigator) {
+                try { navigator.vibrate(100); } catch(e) {}
+            }
+        }
     </script>
 
     <!-- Firebase Admin Logic -->
@@ -339,14 +369,12 @@
                 document.getElementById('noti-text').innerText = message; 
                 banner.style.display = 'block'; 
                 
-                // ভাইব্রেশন লজিক
+                // ভাইব্রেশন
                 if ("vibrate" in navigator) {
-                    try {
-                        navigator.vibrate([200, 100, 200, 100, 200]);
-                    } catch(e) {}
+                    try { navigator.vibrate([200, 100, 200, 100, 200]); } catch(e) {}
                 }
 
-                // প্রিমিয়াম রিংটোন / মিউজিক সাউন্ড
+                // সাউন্ড বা রিংটোন বাজানো
                 try { 
                     let audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2870/2870-preview.mp3'); 
                     audio.play(); 
