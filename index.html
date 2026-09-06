@@ -7,7 +7,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="style.css" rel="stylesheet">
     
-    <!-- 👇 ম্যাজিক এনিমেশন কোড 👇 -->
     <style>
         body { animation: pageLoad 0.4s ease-out forwards; }
         @keyframes pageLoad { 
@@ -15,7 +14,6 @@
             100% { opacity: 1; transform: translateY(0); } 
         }
         
-        /* বাটনে ক্লিক করলে দেবে যাওয়ার এনিমেশন */
         .games-grid > div:active, 
         #dynamic-hot-offers > div:active,
         .nav-item:active, 
@@ -24,7 +22,6 @@
             transition: transform 0.1s ease !important; 
         }
     </style>
-    <!-- 👆 ম্যাজিক এনিমেশন শেষ 👆 -->
 </head>
 <body style="background-color: #0b0f19; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding-bottom: 80px;">
 
@@ -88,15 +85,15 @@
             <p style="grid-column: span 3; text-align: center; color: #94a3b8; font-size: 12px;">Loading games...</p>
         </div>
 
-        <!-- 👇 Hot Offers with Flash Sale Timer 👇 -->
+        <!-- Hot Offers with Flash Sale Timer -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 25px; margin-bottom: 15px;">
             <div style="display: flex; align-items: center; gap: 10px;">
                 <h3 style="margin: 0; font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 6px;">
                     <i class="fa-solid fa-fire-flame-curved" style="color: #ef4444;"></i> HOT OFFERS
                 </h3>
                 
-                <!-- Timer Badges -->
-                <div style="display: flex; gap: 4px; align-items: center;">
+                <!-- 👇 Timer Badges with ID for Control 👇 -->
+                <div id="flash-timer-container" style="display: flex; gap: 4px; align-items: center;">
                     <div style="background: #ef4444; color: white; padding: 3px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; box-shadow: 0 2px 5px rgba(239, 68, 68, 0.4);" id="flash-hrs">00</div><span style="color: #ef4444; font-weight: bold; font-size: 12px;">:</span>
                     <div style="background: #ef4444; color: white; padding: 3px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; box-shadow: 0 2px 5px rgba(239, 68, 68, 0.4);" id="flash-mins">00</div><span style="color: #ef4444; font-weight: bold; font-size: 12px;">:</span>
                     <div style="background: #ef4444; color: white; padding: 3px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; box-shadow: 0 2px 5px rgba(239, 68, 68, 0.4);" id="flash-secs">00</div>
@@ -106,25 +103,15 @@
         </div>
 
         <script>
-            // Flash Sale Timer Logic (Ends at midnight everyday)
             function updateFlashTimer() {
-                const now = new Date();
-                const midnight = new Date();
-                midnight.setHours(24, 0, 0, 0); 
+                const now = new Date(); const midnight = new Date(); midnight.setHours(24, 0, 0, 0); 
                 let diff = midnight - now;
-                let h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                let m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                let s = Math.floor((diff % (1000 * 60)) / 1000);
-                document.getElementById('flash-hrs').innerText = h.toString().padStart(2, '0');
-                document.getElementById('flash-mins').innerText = m.toString().padStart(2, '0');
-                document.getElementById('flash-secs').innerText = s.toString().padStart(2, '0');
+                let h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)); let m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)); let s = Math.floor((diff % (1000 * 60)) / 1000);
+                document.getElementById('flash-hrs').innerText = h.toString().padStart(2, '0'); document.getElementById('flash-mins').innerText = m.toString().padStart(2, '0'); document.getElementById('flash-secs').innerText = s.toString().padStart(2, '0');
             }
-            setInterval(updateFlashTimer, 1000);
-            updateFlashTimer();
+            setInterval(updateFlashTimer, 1000); updateFlashTimer();
         </script>
-        <!-- 👆 Flash Sale Timer Logic End 👆 -->
 
-        <!-- Dynamic Hot Offers List -->
         <div id="dynamic-hot-offers" style="display: flex; flex-direction: column; gap: 15px;">
             <p style="text-align: center; color: #94a3b8; font-size: 12px;">Loading offers...</p>
         </div>
@@ -166,14 +153,13 @@
         </div>
     </div>
 
-    <!-- 👇 Maintenance Mode Block 👇 -->
+    <!-- Maintenance Mode Block -->
     <div id="maintenance-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(11, 15, 25, 0.98); backdrop-filter: blur(5px); z-index: 9999999; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; box-sizing: border-box;">
         <i class="fa-solid fa-person-digging" style="font-size: 60px; color: #f59e0b; margin-bottom: 20px; animation: bounce 2s infinite;"></i>
         <h2 style="color: white; margin-bottom: 10px;">App Under Maintenance</h2>
         <p id="maintenance-message" style="color: #94a3b8; font-size: 14px; line-height: 1.6;">সার্ভার আপডেটের কাজ চলছে। দয়া করে কিছুক্ষণ পর আবার চেষ্টা করুন!</p>
         <style>@keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-20px);} 60% {transform: translateY(-10px);} }</style>
     </div>
-    <!-- 👆 Maintenance Mode Block End 👆 -->
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -182,7 +168,7 @@
         function closePopup() { document.getElementById("noticePopup").style.display = "none"; sessionStorage.setItem("noticeShown", "true"); }
     </script>
 
-    <!-- 👇 Firebase Script 👇 -->
+    <!-- Firebase Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -202,7 +188,6 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // Load Games
         onValue(ref(db, 'homepage_categories'), (snapshot) => {
             const grid = document.getElementById('dynamic-categories'); grid.innerHTML = ''; 
             if (snapshot.exists()) {
@@ -213,7 +198,6 @@
             } else { grid.innerHTML = '<p style="grid-column: span 3; text-align: center; color: #ef4444; font-size: 12px;">No games available!</p>'; }
         });
 
-        // Load Hot Offers
         onValue(ref(db, 'hot_offers'), (snapshot) => {
             const container = document.getElementById('dynamic-hot-offers'); container.innerHTML = ''; 
             if (snapshot.exists()) {
@@ -238,7 +222,6 @@
             } else { container.innerHTML = '<p style="text-align: center; color: #94a3b8; font-size: 12px;">No hot offers right now!</p>'; }
         });
 
-        // Load Banners
         onValue(ref(db, 'settings/ui_settings'), (snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
@@ -250,7 +233,6 @@
             }
         });
 
-        // Load Balance
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 onValue(ref(db, 'users/' + user.uid), (snapshot) => {
@@ -260,7 +242,6 @@
             } else { window.location.href = "login.html"; }
         });
 
-        // Maintenance Mode Checking Logic
         onValue(ref(db, 'settings/maintenance'), (snapshot) => {
             const overlay = document.getElementById('maintenance-overlay');
             const msgText = document.getElementById('maintenance-message');
@@ -274,6 +255,21 @@
                     overlay.style.display = 'none';
                     document.body.style.overflow = 'auto'; 
                 }
+            }
+        });
+
+        // 👇 Timer Remote Control Receiver 👇
+        onValue(ref(db, 'settings/timer_status'), (snapshot) => {
+            const timerContainer = document.getElementById('flash-timer-container');
+            if(snapshot.exists()) {
+                const data = snapshot.val();
+                if(data.status === true) {
+                    timerContainer.style.display = 'flex';
+                } else {
+                    timerContainer.style.display = 'none';
+                }
+            } else {
+                timerContainer.style.display = 'flex'; // Default ON
             }
         });
     </script>
