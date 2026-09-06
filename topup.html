@@ -6,21 +6,26 @@
     <title>Game Top Up</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* 👇 ম্যাজিক এনিমেশন কোড 👇 */
+        /* 👇 ম্যাজিক এনিমেশন ও ভ্যালিডেশন স্টাইল 👇 */
         body { background-color: #0b0f19; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding-bottom: 80px; animation: pageLoad 0.4s ease-out forwards; }
         @keyframes pageLoad { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
         .pkg-card:active, .nav-item:active, .submit-btn:active, .back-btn:active { transform: scale(0.92) !important; transition: transform 0.1s ease !important; }
-        /* 👆 ম্যাজিক এনিমেশন শেষ 👆 */
-
+        
         .premium-header { display: flex; align-items: center; justify-content: center; padding: 20px; position: relative; background-color: #0b0f19; }
         .premium-header .back-btn { position: absolute; left: 20px; font-size: 20px; color: #ffffff; cursor: pointer; }
         .premium-header .title { font-size: 16px; font-weight: bold; letter-spacing: 1px; margin: 0; display: flex; align-items: center; gap: 5px; text-transform: uppercase; }
         .premium-header .title span { color: #3b82f6; }
         .content-container { padding: 0 20px; }
         .section-label { font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-top: 20px; margin-bottom: 8px; display: block; }
+        
         .input-box { position: relative; width: 100%; }
         .input-box input { width: 100%; background-color: #151b29; border: 1px solid #2a3449; color: white; padding: 14px 15px; border-radius: 10px; box-sizing: border-box; font-size: 14px; outline: none; transition: 0.3s; }
         .input-box input:focus { border-color: #3b82f6; }
+        
+        /* 👇 ইনভ্যালিড হলে ইনপুট বক্স লাল করার স্টাইল 👇 */
+        .input-box input.invalid { border-color: #ef4444 !important; background-color: rgba(239, 68, 68, 0.05); }
+        .error-msg { color: #ef4444; font-size: 11px; margin-top: 5px; display: none; font-weight: 600; }
+
         .package-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
         .pkg-card { background-color: #151b29; border: 1.5px solid #2a3449; border-radius: 10px; padding: 15px 5px; text-align: center; cursor: pointer; position: relative; transition: 0.3s; }
         .pkg-card.selected { border-color: #3b82f6; background-color: rgba(59, 130, 246, 0.05); }
@@ -29,18 +34,22 @@
         .pkg-card .price { font-size: 14px; font-weight: bold; color: #e2e8f0; margin: 0; }
         .checkmark { display: none; position: absolute; bottom: -6px; right: -6px; background-color: #3b82f6; color: white; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; align-items: center; justify-content: center; border: 2px solid #0b0f19; }
         .pkg-card.selected .checkmark { display: flex; }
+        
         .wallet-box { background-color: #151b29; border: 1px solid #3b82f6; border-radius: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
         .wallet-info h4 { margin: 0 0 4px 0; font-size: 14px; font-weight: normal; }
         .wallet-info p { margin: 0; font-size: 13px; color: #94a3b8; }
         .wallet-balance { font-size: 18px; font-weight: bold; color: #3b82f6; display: flex; align-items: center; gap: 8px;}
+        
         .submit-btn { width: 100%; background-color: #1d4ed8; color: white; border: none; padding: 16px; border-radius: 10px; font-size: 14px; font-weight: bold; margin-top: 30px; cursor: pointer; box-shadow: 0 4px 15px rgba(29, 78, 216, 0.4); transition: 0.3s;}
         .submit-btn:disabled { background-color: #475569; cursor: not-allowed; box-shadow: none; }
         .submit-btn:active:not(:disabled) { background-color: #1e40af; }
+        
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); z-index: 1000; justify-content: center; align-items: center; }
         .modal-content { background-color: #1e293b; padding: 25px; border-radius: 15px; text-align: center; width: 80%; max-width: 300px; border: 1px solid #334155; }
         .success-icon { font-size: 40px; color: #10b981; margin-bottom: 15px; }
         .modal-content h3 { margin-top: 0; color: white; }
         .modal-content p { color: #cbd5e1; font-size: 14px; margin-bottom: 20px; }
+        
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: #151b29; border-top: 1px solid #2a3449; display: flex; justify-content: space-around; padding: 12px 0; z-index: 99; }
         .nav-item { text-align: center; color: #94a3b8; cursor: pointer; font-size: 12px; }
         .nav-item i { font-size: 20px; display: block; margin-bottom: 4px; }
@@ -55,7 +64,10 @@
     
     <div class="content-container">
         <label class="section-label" id="input-label">Player UID / Tag</label>
-        <div class="input-box"><input type="text" id="playerUid" placeholder="Enter Player ID/Tag"></div>
+        <div class="input-box">
+            <input type="text" id="playerUid" placeholder="Enter Player ID/Tag" oninput="validatePlayerId()">
+            <div id="error-msg" class="error-msg">Invalid Player ID</div>
+        </div>
         
         <label class="section-label">Player Name (optional)</label>
         <div class="input-box"><input type="text" id="playerName" placeholder="Enter Player Name"></div>
@@ -92,10 +104,57 @@
         document.title = `${gameName} Top Up`;
 
         window.selectedDiamond = ""; window.selectedPrice = 0; window.selectedPkgName = "";
+        window.isIdValid = false;
+
+        // 👇 গেম ভেদে আইডি ভ্যালিডেশন লজিক 👇
+        window.validatePlayerId = function() {
+            let uidInput = document.getElementById('playerUid');
+            let errorDiv = document.getElementById('error-msg');
+            let val = uidInput.value.trim();
+            let gName = gameName.toLowerCase();
+
+            let isValid = true;
+
+            if (val.length === 0) {
+                isValid = false;
+                errorDiv.style.display = 'none'; // খালি থাকলে লাল দেখাবে না, শুধু সাবমিট আটকাবে
+                uidInput.classList.remove('invalid');
+            } else {
+                if (gName.includes('free fire')) {
+                    // ফ্রি ফায়ার আইডি সাধারণত ৮ থেকে ১০ ডিজিটের হয়
+                    if (!/^\d{8,10}$/.test(val)) { isValid = false; }
+                } else if (gName.includes('pubg')) {
+                    // পাবজি আইডি সাধারণত ৮ থেকে ১১ ডিজিটের হয়
+                    if (!/^\d{8,11}$/.test(val)) { isValid = false; }
+                } else if (gName.includes('call of duty') || gName.includes('cod')) {
+                    // কল অব ডিউটি আইডি সাধারণত ৮ থেকে ১২ ডিজিট বা অক্ষর হতে পারে
+                    if (val.length < 6 || val.length > 15) { isValid = false; }
+                } else {
+                    // ডিফল্ট জেনেরিক চেক (কমপক্ষে ৬ ডিজিট)
+                    if (val.length < 5) { isValid = false; }
+                }
+
+                if (!isValid) {
+                    uidInput.classList.add('invalid');
+                    errorDiv.innerText = `Invalid ${gameName} Player ID`;
+                    errorDiv.style.display = 'block';
+                } else {
+                    uidInput.classList.remove('invalid');
+                    errorDiv.style.display = 'none';
+                }
+            }
+
+            window.isIdValid = isValid;
+        }
+
         window.selectPackage = function(element, diamond, price, pkgName) {
             let cards = document.querySelectorAll('.pkg-card'); cards.forEach(card => card.classList.remove('selected'));
             element.classList.add('selected'); window.selectedDiamond = diamond; window.selectedPrice = price; window.selectedPkgName = pkgName;
-            let btn = document.getElementById('submit-btn'); btn.innerText = `PAY ৳${price} FROM WALLET`; btn.disabled = false;
+            
+            let btn = document.getElementById('submit-btn'); 
+            btn.innerText = `PAY ৳${price} FROM WALLET`; 
+            // যদি আইডি ভ্যালিড হয় তবেই বাটন সচল হবে
+            btn.disabled = !window.isIdValid;
         }
     </script>
     
@@ -112,7 +171,7 @@
         onAuthStateChanged(auth, (user) => { 
             if (user) { 
                 currentUser = user; 
-                userEmail = user.email || "Unknown"; // 👇 জিমেইল সেভ করে নিলাম 👇
+                userEmail = user.email || "Unknown"; 
                 onValue(ref(db, 'users/' + user.uid), (snapshot) => { 
                     if (snapshot.exists() && snapshot.val().balance !== undefined) { 
                         currentBalance = snapshot.val().balance; 
@@ -135,20 +194,25 @@
                     card.onclick = function() { window.selectPackage(this, pkg.diamond, pkg.price, pkg.name); };
                     card.innerHTML = `<h3>${pkg.diamond}</h3><p>${pkg.name}</p><div class="price">৳${pkg.price}</div><div class="checkmark"><i class="fa-solid fa-check"></i></div>`;
                     container.appendChild(card);
-                    if(isFirst) { window.selectedDiamond = pkg.diamond; window.selectedPrice = pkg.price; window.selectedPkgName = pkg.name; submitBtn.innerText = `PAY ৳${pkg.price} FROM WALLET`; submitBtn.disabled = false; isFirst = false; }
+                    if(isFirst) { window.selectedDiamond = pkg.diamond; window.selectedPrice = pkg.price; window.selectedPkgName = pkg.name; submitBtn.innerText = `PAY ৳${pkg.price} FROM WALLET`; submitBtn.disabled = !window.isIdValid; isFirst = false; }
                 });
             } else { container.innerHTML = '<div style="grid-column: span 3; text-align: center; color: #94a3b8; font-size: 13px; padding: 20px;">No packages available right now!</div>'; submitBtn.innerText = "No Packages Available"; submitBtn.disabled = true; window.selectedPrice = 0; }
         });
         
         document.getElementById("submit-btn").addEventListener("click", async () => {
-            if (!currentUser) return; let uid = document.getElementById("playerUid").value.trim(); let name = document.getElementById("playerName").value.trim();
-            if (uid === "") return alert("Please enter Player ID!"); if (window.selectedPrice === 0 || document.getElementById('submit-btn').disabled) return;
+            if (!currentUser) return; 
+            let uid = document.getElementById("playerUid").value.trim(); 
+            let name = document.getElementById("playerName").value.trim();
+            
+            if (!window.isIdValid) return alert("Please enter a valid Player ID!"); 
+            if (uid === "") return alert("Please enter Player ID!"); 
+            if (window.selectedPrice === 0 || document.getElementById('submit-btn').disabled) return;
+            
             if (currentBalance < window.selectedPrice) { alert("Insufficient balance! Please Add Money."); window.location.href = "addmoney.html"; return; }
             let submitBtn = document.getElementById('submit-btn'); submitBtn.innerText = "Processing..."; submitBtn.disabled = true;
             try {
                 await update(ref(db, 'users/' + currentUser.uid), { balance: currentBalance - window.selectedPrice });
                 
-                // 👇 এখানে userPhone এর জায়গায় userEmail পাঠিয়ে দিলাম 👇
                 const orderData = { 
                     uid: currentUser.uid, 
                     userPhone: userEmail, 
