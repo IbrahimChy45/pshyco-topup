@@ -251,7 +251,10 @@
                     orders.reverse().forEach(order => {
                         let uId = order.uid || ""; let uName = usersData[uId]?.name || "Guest User"; let uEmail = usersData[uId]?.email || order.userPhone || "No Email Given"; let uPic = usersData[uId]?.profilePic || "https://via.placeholder.com/45/3b82f6/ffffff?text=U";
                         let badge = order.status === 'Completed' ? 'completed' : order.status === 'Cancelled' ? 'cancelled' : 'pending';
-                        let buttons = order.status === 'Pending' ? `<button class="btn-complete" onclick="window.updateStatus('orders', '${order.id}', 'Completed')">Complete</button><button class="btn-reject" onclick="window.updateStatus('orders', '${order.id}', 'Cancelled')">Reject</button>` : `<button class="btn-disabled" disabled>${order.status}</button>`;
+                        
+                        // 👇 রিজেক্ট বা ক্যান্সেল করলে রিফান্ড লজিক ফাংশন কল করা হলো 👇
+                        let buttons = order.status === 'Pending' ? `<button class="btn-complete" onclick="window.updateOrderStatus('${order.id}', 'Completed', '${order.uid}', ${order.price})">Complete</button><button class="btn-reject" onclick="window.updateOrderStatus('${order.id}', 'Cancelled', '${order.uid}', ${order.price})">Reject</button>` : `<button class="btn-disabled" disabled>${order.status}</button>`;
+                        
                         html += `
                         <div style="margin-bottom:15px; padding:15px; background:#151b29; border:1px solid #2a3449; border-radius:8px;">
                             <div class="user-card"><img src="${uPic}" alt="dp"><div><b>${uName}</b><span>${uEmail}</span></div></div>
@@ -320,7 +323,7 @@
                     const data = snapshot.val(); 
                     document.getElementById('admin-maintenance-msg').value = data.message || ""; 
                     if(data.status === true) {
-                        document.getElementById('maintenance-status-text').innerText = "Current Status: 🔴 ON (App Locked)";
+                        document.getElementById('maintenance-status-text').innerText = "Current Status: 🟢 ON (App Locked)";
                         document.getElementById('maintenance-status-text').style.color = "#ef4444";
                     } else {
                         document.getElementById('maintenance-status-text').innerText = "Current Status: 🟢 OFF (App Active)";
@@ -329,7 +332,7 @@
                 } 
             });
 
-            // 👇 Timer Mode Logic 👇
+            // Timer Mode Logic
             onValue(ref(db, 'settings/timer_status'), (snapshot) => {
                 if (snapshot.exists()) {
                     const data = snapshot.val();
@@ -358,7 +361,6 @@
             }
         }
 
-        // 👇 Timer Control Writing Logic 👇
         window.toggleTimer = async (status) => {
             let msg = status ? "ইউজার অ্যাপে ফ্ল্যাশ সেল টাইমার চালু করতে চান?" : "ইউজার অ্যাপ থেকে ফ্ল্যাশ সেল টাইমার সরাতে চান?";
             if(confirm(msg)) {
@@ -368,6 +370,31 @@
         }
 
         window.updateStatus = async (path, id, newStatus) => { if(confirm(`Mark as ${newStatus}?`)) await update(ref(db, `${path}/${id}`), { status: newStatus }); }
+        
+        // 👇 অর্ডার স্ট্যাটাস আপডেট ও রিজেক্ট হলে ব্যালেন্স রিফান্ড করার ফাংশন 👇
+        window.updateOrderStatus = async (orderId, newStatus, userId, orderPrice) => {
+            let actionName = newStatus === 'Completed' ? 'Complete' : 'Reject (Refund Money)';
+            if(confirm(`Are you sure you want to mark this order as ${actionName}?`)) {
+                try {
+                    // যদি অর্ডার রিজেক্ট বা ক্যানসেল করা হয়, তবে ইউজারের ওয়ালেটে টাকা ফেরত দেবো
+                    if (newStatus === 'Cancelled' && userId && orderPrice > 0) {
+                        const userBalRef = ref(db, `users/${userId}/balance`);
+                        const userSnap = await get(userBalRef);
+                        let currentBal = userSnap.exists() ? Number(userSnap.val()) : 0;
+                        
+                        // ইউজারের ব্যালেন্সে অর্ডারের টাকা যোগ করা হচ্ছে
+                        await set(userBalRef, currentBal + Number(orderPrice));
+                    }
+
+                    // অর্ডারের স্ট্যাটাস আপডেট করা
+                    await update(ref(db, `orders/${orderId}`), { status: newStatus });
+                    alert(newStatus === 'Cancelled' ? "Order rejected and amount refunded to user wallet successfully!" : "Order marked as completed!");
+                } catch (error) {
+                    alert("Error: " + error.message);
+                }
+            }
+        }
+
         window.deleteItem = async (path, key) => { if(confirm("Are you sure you want to delete this?")) await remove(ref(db, `${path}/${key}`)); }
         window.approveMoney = async (reqId, uid, amount) => { if(confirm(`Approve adding ৳${amount}?`)) { await update(ref(db, `add_money_requests/${reqId}`), { status: 'Completed' }); const snap = await get(ref(db, `users/${uid}`)); let currentBal = (snap.exists() && snap.val().balance) ? Number(snap.val().balance) : 0; await update(ref(db, `users/${uid}`), { balance: currentBal + Number(amount) }); alert("Successfully added balance!"); } }
         window.resetAllData = async () => { if(confirm("সতর্কতা! সমস্ত রেকর্ড মুছে ফেলতে চান?")) { try { await remove(ref(db, 'orders')); await remove(ref(db, 'add_money_requests')); alert("রেকর্ড মুছে ফেলা হয়েছে!"); document.getElementById('stat-total-orders').innerText = "0"; document.getElementById('stat-pending').innerText = "0"; document.getElementById('stat-revenue').innerText = "৳ 0"; } catch (e) { alert("Error: " + e.message); } } };
