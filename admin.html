@@ -1,4 +1,4 @@
-        <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -125,9 +125,20 @@
             <div id="dynamic-package-lists" style="max-height: 400px; overflow-y: auto;"><div class="empty-msg">Loading packages...</div></div>
         </div>
 
-        <!-- Hot Offers -->
+        <!-- 👇 Hot Offers & Timer Control 👇 -->
         <div class="admin-section">
-            <h3 class="section-title"><i class="fa-solid fa-fire" style="color: #ef4444;"></i> Hot Offers</h3>
+            <h3 class="section-title"><i class="fa-solid fa-fire" style="color: #ef4444;"></i> Hot Offers & Timer</h3>
+            
+            <!-- Timer Toggle Switch -->
+            <div style="background: rgba(239, 68, 68, 0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.2); margin-bottom: 15px;">
+                <p style="font-size: 12px; color: #cbd5e1; margin: 0 0 10px 0;">ফ্ল্যাশ সেল টাইমার (হোমপেজ)</p>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="window.toggleTimer(true)" class="submit-btn" style="background-color: #10b981; margin: 0; padding: 8px;"><i class="fa-solid fa-clock"></i> Turn ON</button>
+                    <button onclick="window.toggleTimer(false)" class="submit-btn" style="background-color: #ef4444; margin: 0; padding: 8px;"><i class="fa-solid fa-clock-rotate-left"></i> Turn OFF</button>
+                </div>
+                <p id="timer-status-text" style="font-size: 12px; font-weight: bold; margin-top: 10px; color: #10b981;">Current Status: 🟢 ON</p>
+            </div>
+
             <input type="text" id="offer-title" class="input-dark" placeholder="Offer Title">
             <input type="text" id="offer-subtitle" class="input-dark" placeholder="Subtitle">
             <input type="number" id="offer-old-price" class="input-dark" placeholder="Regular Price (Optional)">
@@ -142,7 +153,7 @@
 
     <!-- TAB 4: SETTINGS -->
     <div id="tab-settings" class="tab-content">
-        <!-- 👇 Maintenance Mode Section 👇 -->
+        <!-- Maintenance Mode Section -->
         <div class="admin-section" style="border-color: #f59e0b; background-color: rgba(245, 158, 11, 0.05);">
             <h3 class="section-title" style="color: #f59e0b; border-bottom-color: rgba(245, 158, 11, 0.2);"><i class="fa-solid fa-person-digging"></i> Maintenance Mode</h3>
             <p style="font-size: 11px; color: #94a3b8; margin-top:-5px; margin-bottom: 12px;">এটি অন করলে ইউজাররা অ্যাপে ঢুকতে বা কোনো কাজ করতে পারবে না।</p>
@@ -227,46 +238,24 @@
         onAuthStateChanged(auth, (user) => { if (user) fetchAdminData(); else window.location.href = "login.html"; });
 
         function fetchAdminData() {
-            let usersData = {}; 
-            let ordersSnap = null;
-            let requestsSnap = null;
+            let usersData = {}; let ordersSnap = null; let requestsSnap = null;
 
             const renderOrders = (snapshot) => {
-                let container = document.getElementById('game-order-list');
-                let html = ''; let orders = []; let totalOrders = 0, pendingCount = 0, revenue = 0;
-                
+                let container = document.getElementById('game-order-list'); let html = ''; let orders = []; let totalOrders = 0, pendingCount = 0, revenue = 0;
                 if (snapshot.exists()) {
                     snapshot.forEach(child => {
                         let order = child.val(); orders.push({ id: child.key, ...order });
-                        totalOrders++;
-                        if(order.status === 'Pending') pendingCount++;
-                        if(order.status === 'Completed') revenue += Number(order.price || 0);
+                        totalOrders++; if(order.status === 'Pending') pendingCount++; if(order.status === 'Completed') revenue += Number(order.price || 0);
                     });
-                    
-                    document.getElementById('stat-total-orders').innerText = totalOrders;
-                    document.getElementById('stat-pending').innerText = pendingCount;
-                    document.getElementById('stat-revenue').innerText = "৳ " + revenue;
-                    
+                    document.getElementById('stat-total-orders').innerText = totalOrders; document.getElementById('stat-pending').innerText = pendingCount; document.getElementById('stat-revenue').innerText = "৳ " + revenue;
                     orders.reverse().forEach(order => {
-                        let uId = order.uid || ""; 
-                        let uName = usersData[uId]?.name || "Guest User";
-                        let uEmail = usersData[uId]?.email || order.userPhone || "No Email Given";
-                        let uPic = usersData[uId]?.profilePic || "https://via.placeholder.com/45/3b82f6/ffffff?text=U";
-                        
+                        let uId = order.uid || ""; let uName = usersData[uId]?.name || "Guest User"; let uEmail = usersData[uId]?.email || order.userPhone || "No Email Given"; let uPic = usersData[uId]?.profilePic || "https://via.placeholder.com/45/3b82f6/ffffff?text=U";
                         let badge = order.status === 'Completed' ? 'completed' : order.status === 'Cancelled' ? 'cancelled' : 'pending';
                         let buttons = order.status === 'Pending' ? `<button class="btn-complete" onclick="window.updateStatus('orders', '${order.id}', 'Completed')">Complete</button><button class="btn-reject" onclick="window.updateStatus('orders', '${order.id}', 'Cancelled')">Reject</button>` : `<button class="btn-disabled" disabled>${order.status}</button>`;
-                        
                         html += `
                         <div style="margin-bottom:15px; padding:15px; background:#151b29; border:1px solid #2a3449; border-radius:8px;">
-                            <div class="user-card">
-                                <img src="${uPic}" alt="dp">
-                                <div><b>${uName}</b><span>${uEmail}</span></div>
-                            </div>
-                            
-                            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                                <span style="color:#ffaa00; font-weight:bold;">${order.game || 'Top Up'}</span>
-                                <span class="badge ${badge}">${order.status}</span>
-                            </div>
+                            <div class="user-card"><img src="${uPic}" alt="dp"><div><b>${uName}</b><span>${uEmail}</span></div></div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span style="color:#ffaa00; font-weight:bold;">${order.game || 'Top Up'}</span><span class="badge ${badge}">${order.status}</span></div>
                             <p style="margin:5px 0; font-size:13px; color:#94a3b8;">UID/Info: <span style="color:white;">${order.playerId || 'N/A'}</span></p>
                             <p style="margin:5px 0; font-size:13px; color:#94a3b8;">Package: <span style="color:white;">${order.packageName}</span></p>
                             <p style="margin:5px 0; font-size:13px; color:#94a3b8;">Price: <b style="color:#3b82f6;">৳${order.price}</b></p>
@@ -274,57 +263,31 @@
                         </div>`;
                     });
                     container.innerHTML = html;
-                } else {
-                    container.innerHTML = '<div class="empty-msg">No Orders</div>';
-                    document.getElementById('stat-total-orders').innerText = 0; document.getElementById('stat-pending').innerText = 0; document.getElementById('stat-revenue').innerText = "৳ 0";
-                }
+                } else { container.innerHTML = '<div class="empty-msg">No Orders</div>'; document.getElementById('stat-total-orders').innerText = 0; document.getElementById('stat-pending').innerText = 0; document.getElementById('stat-revenue').innerText = "৳ 0"; }
             };
 
             const renderRequests = (snapshot) => {
-                let container = document.getElementById('add-money-list');
-                let html = ''; let requests = [];
-                
+                let container = document.getElementById('add-money-list'); let html = ''; let requests = [];
                 if (snapshot.exists()) {
                     snapshot.forEach(child => { requests.push({ id: child.key, ...child.val() }); });
                     requests.reverse().forEach(req => {
-                        let uId = req.uid || "";
-                        let uName = usersData[uId]?.name || "Guest User";
-                        let uEmail = usersData[uId]?.email || req.userPhone || "No Email Given";
-                        let uPic = usersData[uId]?.profilePic || "https://via.placeholder.com/45/10b981/ffffff?text=U";
-
+                        let uId = req.uid || ""; let uName = usersData[uId]?.name || "Guest User"; let uEmail = usersData[uId]?.email || req.userPhone || "No Email Given"; let uPic = usersData[uId]?.profilePic || "https://via.placeholder.com/45/10b981/ffffff?text=U";
                         let badge = req.status === 'Completed' ? 'completed' : req.status === 'Rejected' ? 'cancelled' : 'pending';
                         let buttons = req.status === 'Pending' ? `<button class="btn-complete" onclick="window.approveMoney('${req.id}', '${req.uid}', ${req.amount})">Approve</button><button class="btn-reject" onclick="window.updateStatus('add_money_requests', '${req.id}', 'Rejected')">Reject</button>` : `<button class="btn-disabled" disabled>${req.status}</button>`;
-                        
                         html += `
                         <div style="margin-bottom:15px; padding:15px; background:#151b29; border:1px solid #2a3449; border-radius:8px;">
-                            <div class="user-card" style="border-color: rgba(16, 185, 129, 0.4);">
-                                <img src="${uPic}" style="border-color: #10b981;" alt="dp">
-                                <div><b>${uName}</b><span>${uEmail}</span></div>
-                            </div>
-
-                            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                                <span style="color:#e2e8f0; font-weight:bold;">${req.method || 'Payment'}</span>
-                                <span class="badge ${badge}">${req.status}</span>
-                            </div>
+                            <div class="user-card" style="border-color: rgba(16, 185, 129, 0.4);"><img src="${uPic}" style="border-color: #10b981;" alt="dp"><div><b>${uName}</b><span>${uEmail}</span></div></div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span style="color:#e2e8f0; font-weight:bold;">${req.method || 'Payment'}</span><span class="badge ${badge}">${req.status}</span></div>
                             <p style="margin:5px 0; font-size:13px; color:#94a3b8;">Amount: <b style="color:#3b82f6;">৳${req.amount}</b></p>
                             <p style="margin:5px 0; font-size:13px; color:#94a3b8;">TrxID: <span style="color:white;">${req.trxid}</span></p>
                             <div class="order-actions" style="margin-top:10px;">${buttons}</div>
                         </div>`;
                     });
                     container.innerHTML = html;
-                } else {
-                    container.innerHTML = '<div class="empty-msg">No Requests</div>';
-                }
+                } else { container.innerHTML = '<div class="empty-msg">No Requests</div>'; }
             };
 
-            onValue(ref(db, 'users'), (snap) => {
-                if(snap.exists()) {
-                    usersData = snap.val();
-                    if(ordersSnap) renderOrders(ordersSnap);
-                    if(requestsSnap) renderRequests(requestsSnap);
-                }
-            });
-
+            onValue(ref(db, 'users'), (snap) => { if(snap.exists()) { usersData = snap.val(); if(ordersSnap) renderOrders(ordersSnap); if(requestsSnap) renderRequests(requestsSnap); } });
             onValue(ref(db, 'orders'), (snap) => { ordersSnap = snap; renderOrders(snap); });
             onValue(ref(db, 'add_money_requests'), (snap) => { requestsSnap = snap; renderRequests(snap); });
 
@@ -351,7 +314,7 @@
 
             onValue(ref(db, 'hot_offers'), (snapshot) => { let container = document.getElementById('admin-offer-list'); let html = ''; if (snapshot.exists()) { snapshot.forEach(child => { let offer = child.val(); html += `<div style="background: #151b29; padding: 12px; border: 1px solid #2a3449; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;"><div style="display:flex; align-items:center; gap: 10px;"><img src="${offer.image}" style="width: 30px; height: 30px; border-radius:5px; object-fit:cover;"><div><b style="color: white; font-size: 13px;">${offer.title}</b><div style="color: #ef4444; font-size: 10px;">৳${offer.newPrice}</div></div></div><button onclick="window.deleteItem('hot_offers', '${child.key}')" style="background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">Delete</button></div>`; }); container.innerHTML = html; } else { container.innerHTML = '<div class="empty-msg">No active offers!</div>'; } });
             
-            // 👇 Maintenance Mode Reading Logic 👇
+            // Maintenance Mode Logic
             onValue(ref(db, 'settings/maintenance'), (snapshot) => { 
                 if (snapshot.exists()) { 
                     const data = snapshot.val(); 
@@ -366,19 +329,41 @@
                 } 
             });
 
+            // 👇 Timer Mode Logic 👇
+            onValue(ref(db, 'settings/timer_status'), (snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    if(data.status === true) {
+                        document.getElementById('timer-status-text').innerText = "Current Status: 🟢 ON (Timer Active)";
+                        document.getElementById('timer-status-text').style.color = "#10b981";
+                    } else {
+                        document.getElementById('timer-status-text').innerText = "Current Status: 🔴 OFF (Timer Hidden)";
+                        document.getElementById('timer-status-text').style.color = "#ef4444";
+                    }
+                } else {
+                    document.getElementById('timer-status-text').innerText = "Current Status: 🟢 ON (Default)";
+                }
+            });
+
             onValue(ref(db, 'settings/payment_numbers'), (snapshot) => { if (snapshot.exists()) { const data = snapshot.val(); document.getElementById('admin-bkash').value = data.bkash || ""; document.getElementById('admin-nagad').value = data.nagad || ""; } });
             onValue(ref(db, 'settings/ui_settings'), (snapshot) => { if (snapshot.exists()) { const data = snapshot.val(); document.getElementById('admin-banner1').value = data.banner1 || ""; document.getElementById('admin-banner2').value = data.banner2 || ""; document.getElementById('admin-banner3').value = data.banner3 || ""; document.getElementById('admin-warning-img').value = data.warningImg || ""; document.getElementById('admin-warning-text').value = data.warningText || ""; } });
             onValue(ref(db, 'settings/support_info'), (snapshot) => { if (snapshot.exists()) { const data = snapshot.val(); document.getElementById('admin-whatsapp').value = data.whatsapp || ""; document.getElementById('admin-telegram').value = data.telegram || ""; } });
         }
 
-        // 👇 Maintenance Mode Writing Logic 👇
         window.toggleMaintenance = async (status) => {
             let msg = document.getElementById('admin-maintenance-msg').value.trim() || "সার্ভার আপডেটের কাজ চলছে। দয়া করে কিছুক্ষণ পর আবার চেষ্টা করুন!";
-            let confirmMsg = status ? "সতর্কতা! মেইনটেনেন্স মোড অন করলে ইউজাররা অ্যাপ ব্যবহার করতে পারবে না। আপনি কি নিশ্চিত?" : "মেইনটেনেন্স মোড অফ করতে চান? ইউজাররা আবার অ্যাপ ব্যবহার করতে পারবে।";
-            
-            if(confirm(confirmMsg)) {
+            if(confirm(status ? "অ্যাপ লক করতে চান?" : "অ্যাপ আনলক করতে চান?")) {
                 await set(ref(db, 'settings/maintenance'), { status: status, message: msg });
-                alert(status ? "Maintenance Mode is ON 🔴\nইউজাররা এখন অ্যাপে ঢুকতে পারবে না।" : "Maintenance Mode is OFF 🟢\nঅ্যাপ আবার লাইভ হয়েছে!");
+                alert(status ? "Maintenance Mode is ON 🔴" : "Maintenance Mode is OFF 🟢");
+            }
+        }
+
+        // 👇 Timer Control Writing Logic 👇
+        window.toggleTimer = async (status) => {
+            let msg = status ? "ইউজার অ্যাপে ফ্ল্যাশ সেল টাইমার চালু করতে চান?" : "ইউজার অ্যাপ থেকে ফ্ল্যাশ সেল টাইমার সরাতে চান?";
+            if(confirm(msg)) {
+                await set(ref(db, 'settings/timer_status'), { status: status });
+                alert(status ? "Timer is ON 🟢" : "Timer is OFF 🔴");
             }
         }
 
@@ -391,12 +376,9 @@
             let searchVal = document.getElementById('user-email').value.trim(); 
             let searchLower = searchVal.toLowerCase();
             let amount = Number(document.getElementById('add-amount').value); 
-            
             if(!searchVal || amount <= 0) { return alert("⚠️ সঠিক জিমেইল, ফোন নাম্বার অথবা UID দিন এবং অ্যামাউন্ট লিখুন!"); }
-            
             let btn = document.getElementById('direct-add-btn'); btn.innerText = "Searching..."; btn.disabled = true; 
             let foundUid = null; const usersSnap = await get(ref(db, 'users')); 
-            
             if(usersSnap.exists()) { 
                 if (usersSnap.hasChild(searchVal)) { foundUid = searchVal; } else {
                     usersSnap.forEach(child => { 
@@ -407,14 +389,12 @@
                     }); 
                 }
             } 
-            
             if(foundUid) { 
                 const balRef = ref(db, `users/${foundUid}/balance`); const snap = await get(balRef); 
                 let currentBal = snap.exists() ? Number(snap.val()) : 0; await set(balRef, currentBal + amount); 
                 alert(`✅ সাফল্য! অ্যাকাউন্টে ৳${amount} অ্যাড করা হয়েছে।`); 
                 document.getElementById('user-email').value = ""; document.getElementById('add-amount').value = ""; 
             } else { alert("❌ অ্যাকাউন্ট পাওয়া যায়নি! জিমেইল, ফোন বা UID সঠিক কি না চেক করুন।"); } 
-            
             btn.innerText = "+ Add Balance"; btn.disabled = false; 
         });
 
