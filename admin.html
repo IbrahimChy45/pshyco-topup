@@ -12,7 +12,6 @@
         .logo span { color: #3b82f6; }
         .header-right-group { display: flex; align-items: center; gap: 10px; }
         
-        /* 👇 একদম ছোট এবং সুন্দর সাউন্ড এনেবল বাটন স্টাইল 👇 */
         .sound-enable-btn { background-color: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
         .sound-enable-btn.enabled { background-color: rgba(16, 185, 129, 0.15); color: #34d399; border-color: rgba(16, 185, 129, 0.4); }
 
@@ -64,11 +63,9 @@
         <span id="noti-text">নতুন অর্ডার এসেছে!</span>
     </div>
 
-    <!-- Header -->
     <header class="admin-header">
         <div class="logo"><i class="fa-solid fa-user-shield" style="color: #3b82f6;"></i> Admin<span>Panel</span></div>
         <div class="header-right-group">
-            <!-- 👇 খুব ছোট সাউন্ড পারমিশন বাটন 👇 -->
             <button id="soundToggleBtn" class="sound-enable-btn" onclick="enableAudioAndVibration()">
                 <i class="fa-solid fa-volume-xmark"></i> Sound Off
             </button>
@@ -76,7 +73,6 @@
         </div>
     </header>
 
-    <!-- Tab Navigation -->
     <div class="admin-tabs">
         <button class="tab-btn active" id="btn-tab-dashboard" onclick="openTab('tab-dashboard', this)"><i class="fa-solid fa-chart-pie"></i> Dashboard</button>
         <button class="tab-btn" id="btn-tab-orders" onclick="openTab('tab-orders', this)">
@@ -118,7 +114,6 @@
 
     <!-- TAB 3: APP CONTENT -->
     <div id="tab-content" class="tab-content">
-        <!-- Homepage Games -->
         <div class="admin-section">
             <h3 class="section-title"><i class="fa-solid fa-layer-group" style="color: #f59e0b;"></i> 1. Homepage Games</h3>
             <input type="text" id="cat-title" class="input-dark" placeholder="Game Title (e.g. Call of Duty)">
@@ -129,7 +124,6 @@
             <div id="admin-category-list" style="display: grid; gap: 10px; max-height: 250px; overflow-y: auto;"></div>
         </div>
 
-        <!-- Manage Packages -->
         <div class="admin-section">
             <h3 class="section-title"><i class="fa-solid fa-tags" style="color: #3b82f6;"></i> 2. Manage Packages</h3>
             <select id="new-pkg-game" class="input-dark" style="margin-bottom: 15px; border-color: #3b82f6;">
@@ -142,7 +136,6 @@
             <div id="dynamic-package-lists" style="max-height: 400px; overflow-y: auto;"><div class="empty-msg">Loading packages...</div></div>
         </div>
 
-        <!-- Hot Offers & Timer Control -->
         <div class="admin-section">
             <h3 class="section-title"><i class="fa-solid fa-fire" style="color: #ef4444;"></i> Hot Offers & Timer</h3>
             
@@ -169,6 +162,14 @@
 
     <!-- TAB 4: SETTINGS -->
     <div id="tab-settings" class="tab-content">
+        
+        <div class="admin-section" style="border-color: #3b82f6; background-color: rgba(59, 130, 246, 0.05);">
+            <h3 class="section-title" style="color: #3b82f6; border-bottom-color: rgba(59, 130, 246, 0.2);"><i class="fa-solid fa-bell"></i> Notification Token</h3>
+            <p style="font-size: 11px; color: #94a3b8; margin-top:-5px; margin-bottom: 12px;">বাটনে ক্লিক করে টোকেন জেনারেট করুন এবং topup.html এ বসান।</p>
+            <input type="text" id="my-fcm-token" class="input-dark" placeholder="Click button to generate token" readonly>
+            <button id="get-token-btn" class="submit-btn" style="background-color: #3b82f6;"><i class="fa-solid fa-key"></i> Get My Token</button>
+        </div>
+
         <div class="admin-section" style="border-color: #f59e0b; background-color: rgba(245, 158, 11, 0.05);">
             <h3 class="section-title" style="color: #f59e0b; border-bottom-color: rgba(245, 158, 11, 0.2);"><i class="fa-solid fa-person-digging"></i> Maintenance Mode</h3>
             <p style="font-size: 11px; color: #94a3b8; margin-top:-5px; margin-bottom: 12px;">এটি অন করলে ইউজাররা অ্যাপে ঢুকতে বা কোনো কাজ করতে পারবে না।</p>
@@ -229,7 +230,6 @@
             }
         });
 
-        // 👇 অডিও পারমিশন এনেবল ফাংশন 👇
         let audioUnlocked = false;
         function enableAudioAndVibration() {
             let audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2870/2870-preview.mp3');
@@ -253,6 +253,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getDatabase, ref, onValue, update, get, set, remove, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js"; 
 
         const firebaseConfig = {
           apiKey: "AIzaSyD2d_najqnMXstfTvjlR6_4kffh5axIasY",
@@ -267,8 +268,36 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
+        const messaging = getMessaging(app); 
 
         onAuthStateChanged(auth, (user) => { if (user) fetchAdminData(); else window.location.href = "login.html"; });
+
+        document.getElementById('get-token-btn').addEventListener('click', async () => {
+            let btn = document.getElementById('get-token-btn');
+            btn.innerText = "Generating...";
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    // 👇 আপনার দেওয়া VAPID Key ঠিক এই লাইনে বসানো হয়েছে 👇
+                    const token = await getToken(messaging, { vapidKey: "BGEo2gDYcr6ZRUBHsyGrVB6dkJp6QhuzxHIDl4ug13YR4b5N-aJIq5e9AFM3lBrAPoI1uUKOJV3WWNe1WMK32tA" });
+                    
+                    if (token) {
+                        document.getElementById('my-fcm-token').value = token;
+                        btn.innerHTML = '<i class="fa-solid fa-check"></i> Token Generated!';
+                        btn.style.backgroundColor = "#10b981";
+                    } else {
+                        alert("Token generation failed!");
+                        btn.innerText = "Try Again";
+                    }
+                } else {
+                    alert("Notification permission denied! Please allow notifications.");
+                    btn.innerText = "Permission Denied";
+                }
+            } catch (error) {
+                alert("Error: " + error.message);
+                btn.innerText = "Failed";
+            }
+        });
 
         let pendingOrdersCount = 0;
         let pendingRequestsCount = 0;
@@ -368,18 +397,8 @@
                 const banner = document.getElementById('notification-banner'); 
                 document.getElementById('noti-text').innerText = message; 
                 banner.style.display = 'block'; 
-                
-                // ভাইব্রেশন
-                if ("vibrate" in navigator) {
-                    try { navigator.vibrate([200, 100, 200, 100, 200]); } catch(e) {}
-                }
-
-                // সাউন্ড বা রিংটোন বাজানো
-                try { 
-                    let audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2870/2870-preview.mp3'); 
-                    audio.play(); 
-                } catch(e) {} 
-                
+                if ("vibrate" in navigator) { try { navigator.vibrate([200, 100, 200, 100, 200]); } catch(e) {} }
+                try { let audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2870/2870-preview.mp3'); audio.play(); } catch(e) {} 
                 setTimeout(() => { banner.style.display = 'none'; }, 5000); 
             }
 
