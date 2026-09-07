@@ -280,6 +280,18 @@
                 const message = `🎮 *New ${gameName} Order*\n\n👤 *User:* ${orderData.userPhone}\n💎 *Package:* ${orderData.packageName}\n💵 *Price:* ৳${orderData.price}\n🆔 *Player ID:* ${orderData.playerId}\n📝 *Name:* ${orderData.playerName}\n⚙️ *Status:* Pending`;
                 fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}&parse_mode=Markdown`);
                 
+                // Vercel Push Notification 
+                const adminFCMToken = "CVRyAd3NFuUaotb8ULL-d8:APA91bFbSQhBqiYwK59al9bDX1o7wVWO8NxW5guo4Zr14aPDqpX3b2Aw-vfhgV8CCvKmJkqxbY3NfoxhILY_5ovgirpiVFhv47FV9Cj4zooV3KRCKV69NG8";
+                fetch("https://pshyco-topup-knvh.vercel.app/api/notify", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        packageName: orderData.packageName,
+                        price: orderData.price,
+                        adminToken: adminFCMToken
+                    })
+                }).catch(err => console.log("Vercel Notification Error", err));
+                
                 document.getElementById('successModal').style.display = 'flex'; setTimeout(() => { window.location.href = "order.html"; }, 2000);
             } catch (error) { alert("Error: " + error.message); submitBtn.innerText = `PAY ৳${window.selectedPrice} FROM WALLET`; submitBtn.disabled = false; }
         });
