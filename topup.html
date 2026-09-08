@@ -72,7 +72,7 @@
     <div class="content-container">
         <label class="section-label" id="input-label">Account Info (Player UID / Tag)</label>
         <div class="input-box">
-            <input type="number" id="playerUid" placeholder="Enter Player ID/Tag" oninput="validatePlayerId()">
+            <input type="text" id="playerUid" placeholder="Enter Player ID/Tag" oninput="validatePlayerId()">
             <div id="error-msg" class="error-msg">Invalid Player ID</div>
             
             <!-- 👇 থিমের সাথে ম্যাচ করা Name Check Button 👇 -->
@@ -171,7 +171,7 @@
             } else {
                 if (gName.includes('free fire')) { if (!/^\d{8,10}$/.test(val)) isValid = false; } 
                 else if (gName.includes('pubg')) { if (!/^\d{8,11}$/.test(val)) isValid = false; } 
-                else if (gName.includes('call of duty') || gName.includes('cod')) { if (val.length < 6 || val.length > 15) isValid = false; } 
+                else if (gName.includes('call of duty') || gName.includes('cod')) { if (val.length < 6 || val.length > 20) isValid = false; } 
                 else { if (val.length < 5) isValid = false; }
 
                 if (!isValid) {
@@ -186,7 +186,7 @@
             if(window.selectedPrice > 0 && window.isIdValid) { btn.disabled = false; } else { btn.disabled = true; }
         }
 
-        // 👇 100% Working Direct Free Fire Multi-API Logic 👇
+        // 👇 Dynamic Auto-Detect Multi-Game Name Check Logic 👇
         window.checkPlayerName = async function() {
             let uid = document.getElementById('playerUid').value.trim();
             if (!uid || !window.isIdValid) return alert("দয়া করে সঠিক Player ID দিন!");
@@ -197,25 +197,44 @@
             btn.disabled = true;
 
             let playerName = null;
-            
-            // ৪টি সেরা ডাইরেক্ট ফ্রি ফায়ার API যা ব্রাউজার থেকে ব্লক হয় না
-            let apis = [
-                `https://api.isan.eu.org/nickname/ff?id=${uid}`,
-                `https://ff-api-62.onrender.com/api/api.php?uid=${uid}`,
-                `https://mr-suroj-ff-api.vercel.app/ff?id=${uid}`,
-                `https://api.ryzendesu.vip/api/game/freefire?id=${uid}`
-            ];
+            let gName = gameName.toLowerCase();
+            let apis = [];
 
+            // গেম অনুযায়ী API লিস্ট তৈরি
+            if (gName.includes('free fire') || gName.includes('ff')) {
+                apis = [
+                    `https://api.isan.eu.org/nickname/ff?id=${uid}`,
+                    `https://ff-api-62.onrender.com/api/api.php?uid=${uid}`,
+                    `https://mr-suroj-ff-api.vercel.app/ff?id=${uid}`,
+                    `https://api.ryzendesu.vip/api/game/freefire?id=${uid}`
+                ];
+            } else if (gName.includes('pubg')) {
+                apis = [
+                    `https://api.isan.eu.org/nickname/pubg?id=${uid}`,
+                    `https://api.ryzendesu.vip/api/game/pubgmobile?id=${uid}`
+                ];
+            } else if (gName.includes('call of duty') || gName.includes('cod')) {
+                apis = [
+                    `https://api.isan.eu.org/nickname/codm?id=${uid}`,
+                    `https://api.ryzendesu.vip/api/game/codmobile?id=${uid}`
+                ];
+            } else {
+                btn.innerHTML = 'এই গেমের Name Check সাপোর্টেড নয়';
+                setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 3000);
+                return;
+            }
+
+            // একাধিক সার্ভারে খোঁজার লুপ
             for (let api of apis) {
                 try {
                     let response = await fetch(api);
                     let data = await response.json();
                     
-                    // বিভিন্ন API-তে নাম বিভিন্ন ভ্যারিয়েবলে থাকে
                     if (data.name) { playerName = data.name; break; }
                     if (data.nickname) { playerName = data.nickname; break; }
                     if (data.AccountName) { playerName = data.AccountName; break; }
                     if (data.Name) { playerName = data.Name; break; }
+                    if (data.username) { playerName = data.username; break; }
                 } catch (e) {
                     console.log("Skipping failed API...");
                 }
@@ -228,7 +247,7 @@
                 btn.style.color = '#10b981';
                 document.getElementById('playerName').value = playerName; 
             } else {
-                btn.innerHTML = 'নাম পাওয়া যায়নি! আবার চেষ্টা করুন';
+                btn.innerHTML = 'নাম পাওয়া যায়নি! সার্ভার ডাউন থাকতে পারে';
                 setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 3000);
             }
         }
