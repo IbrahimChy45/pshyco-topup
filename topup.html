@@ -105,20 +105,32 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        let dbNode = urlParams.get('db') || 'freefire_packages';
-        let gameName = urlParams.get('name');
+        let paramName = urlParams.get('name');
+        let paramDb = urlParams.get('db');
+        let currentUrl = window.location.href.toLowerCase();
 
-        // 👇 স্মার্ট গেম ডিটেকশন (যাতে হেডিং ভুল না হয়) 👇
-        if (!gameName || gameName.toLowerCase() === 'top up') {
-            if (dbNode.includes('pubg')) {
-                gameName = 'PUBG';
-            } else if (dbNode.includes('cod') || dbNode.includes('callofduty')) {
-                gameName = 'Call of Duty';
+        let gameName = "Free Fire";
+        let dbNode = "freefire_packages";
+
+        // 👇 সুপার স্মার্ট গেম ডিটেকশন সিস্টেম 👇
+        if (currentUrl.includes('pubg') || (paramName && paramName.toLowerCase().includes('pubg')) || (paramDb && paramDb.toLowerCase().includes('pubg'))) {
+            gameName = "PUBG";
+            dbNode = paramDb || "pubg_packages";
+        } 
+        else if (currentUrl.includes('cod') || currentUrl.includes('call') || (paramName && paramName.toLowerCase().includes('cod')) || (paramDb && paramDb.toLowerCase().includes('cod'))) {
+            gameName = "Call of Duty";
+            dbNode = paramDb || "cod_packages";
+        } 
+        else {
+            if (paramName && paramName.toLowerCase() !== 'top up' && paramName.toLowerCase() !== 'free fire') {
+                gameName = paramName; 
             } else {
-                gameName = 'Free Fire';
+                gameName = "Free Fire";
             }
+            dbNode = paramDb || "freefire_packages";
         }
 
+        // টাইটেল আপডেট করা হচ্ছে
         document.getElementById('dynamic-title').innerHTML = `${gameName} <span>TOP UP</span>`;
         document.title = `${gameName} Top Up`;
 
@@ -219,7 +231,6 @@
                 ];
             }
 
-            // লেয়ার ১: ডাইরেক্ট ফেচ
             for (let api of apis) {
                 try {
                     let response = await fetch(api);
@@ -229,7 +240,6 @@
                 } catch (e) {}
             }
 
-            // লেয়ার ২: CorsProxy বাইপাস 
             if (!playerName) {
                 for (let api of apis) {
                     try {
@@ -241,7 +251,6 @@
                 }
             }
 
-            // লেয়ার ৩: AllOrigins বাইপাস 
             if (!playerName) {
                 for (let api of apis) {
                     try {
