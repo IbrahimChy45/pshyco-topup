@@ -75,7 +75,6 @@
             <input type="text" id="playerUid" placeholder="Enter Player ID/Tag" oninput="validatePlayerId()">
             <div id="error-msg" class="error-msg">Invalid Player ID</div>
             
-            <!-- 👇 থিমের সাথে ম্যাচ করা Name Check Button 👇 -->
             <button id="check-name-btn" class="check-name-btn" onclick="checkPlayerName()">আপনার গেম আইডির নাম চেক করুন</button>
         </div>
         
@@ -171,7 +170,7 @@
             } else {
                 if (gName.includes('pubg')) { if (!/^\d{8,11}$/.test(val)) isValid = false; } 
                 else if (gName.includes('call of duty') || gName.includes('cod')) { if (val.length < 6 || val.length > 20) isValid = false; } 
-                else { if (!/^\d{5,12}$/.test(val)) isValid = false; } // Default to Free Fire Validation
+                else { if (!/^\d{5,12}$/.test(val)) isValid = false; }
 
                 if (!isValid) {
                     uidInput.classList.add('invalid'); errorDiv.innerText = `Invalid Player ID`; errorDiv.style.display = 'block';
@@ -185,7 +184,7 @@
             if(window.selectedPrice > 0 && window.isIdValid) { btn.disabled = false; } else { btn.disabled = true; }
         }
 
-        // 👇 ডিফল্টভাবে ফ্রি ফায়ার সেট করা হয়েছে 👇
+        // 👇 আল্টিমেট 3-Layer Bypass Name Check Logic 👇
         window.checkPlayerName = async function() {
             let uid = document.getElementById('playerUid').value.trim();
             if (!uid || !window.isIdValid) return alert("দয়া করে সঠিক Player ID দিন!");
@@ -200,41 +199,52 @@
             let apis = [];
 
             if (gName.includes('pubg')) {
-                apis = [
-                    `https://api.isan.eu.org/nickname/pubg?id=${uid}`,
-                    `https://api.ryzendesu.vip/api/game/pubgmobile?id=${uid}`
-                ];
+                apis = [`https://api.isan.eu.org/nickname/pubg?id=${uid}`, `https://api.ryzendesu.vip/api/game/pubgmobile?id=${uid}`];
             } else if (gName.includes('call of duty') || gName.includes('cod')) {
-                apis = [
-                    `https://api.isan.eu.org/nickname/codm?id=${uid}`,
-                    `https://api.ryzendesu.vip/api/game/codmobile?id=${uid}`
-                ];
+                apis = [`https://api.isan.eu.org/nickname/codm?id=${uid}`, `https://api.ryzendesu.vip/api/game/codmobile?id=${uid}`];
             } else {
-                // ডিফল্টভাবে ফ্রি ফায়ারের API কল হবে 
                 apis = [
-                    `https://api.isan.eu.org/nickname/ff?id=${uid}`,
-                    `https://ff-api-62.onrender.com/api/api.php?uid=${uid}`,
                     `https://mr-suroj-ff-api.vercel.app/ff?id=${uid}`,
-                    `https://api.ryzendesu.vip/api/game/freefire?id=${uid}`
+                    `https://api.ryzendesu.vip/api/game/freefire?id=${uid}`,
+                    `https://api.isan.eu.org/nickname/ff?id=${uid}`
                 ];
             }
 
+            // লেয়ার ১: ডাইরেক্ট ফেচ (ব্রাউজার ব্লক না করলে কাজ করবে)
             for (let api of apis) {
                 try {
                     let response = await fetch(api);
                     let data = await response.json();
-                    
-                    if (data.name) { playerName = data.name; break; }
-                    if (data.nickname) { playerName = data.nickname; break; }
-                    if (data.AccountName) { playerName = data.AccountName; break; }
-                    if (data.Name) { playerName = data.Name; break; }
-                    if (data.username) { playerName = data.username; break; }
-                } catch (e) {
-                    console.log("Skipping failed API...");
+                    playerName = data.name || data.nickname || data.AccountName || data.Name || data.username;
+                    if (playerName && playerName !== "null") break;
+                } catch (e) {}
+            }
+
+            // লেয়ার ২: CorsProxy বাইপাস (ব্রাউজার ব্লক করলে এটি কাজ করবে)
+            if (!playerName) {
+                for (let api of apis) {
+                    try {
+                        let response = await fetch("https://corsproxy.io/?" + encodeURIComponent(api));
+                        let data = await response.json();
+                        playerName = data.name || data.nickname || data.AccountName || data.Name || data.username;
+                        if (playerName && playerName !== "null") break;
+                    } catch (e) {}
                 }
             }
 
-            if (playerName) {
+            // লেয়ার ৩: AllOrigins বাইপাস (শেষ চেষ্টা)
+            if (!playerName) {
+                for (let api of apis) {
+                    try {
+                        let response = await fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(api));
+                        let data = await response.json();
+                        playerName = data.name || data.nickname || data.AccountName || data.Name || data.username;
+                        if (playerName && playerName !== "null") break;
+                    } catch (e) {}
+                }
+            }
+
+            if (playerName && playerName !== "null" && playerName !== "") {
                 btn.innerHTML = `${playerName} <i class="fa-solid fa-circle-check"></i>`;
                 btn.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
                 btn.style.borderColor = '#10b981';
