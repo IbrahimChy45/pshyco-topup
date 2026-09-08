@@ -8,7 +8,7 @@
     <style>
         body { background-color: #0b0f19; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding-bottom: 80px; animation: pageLoad 0.4s ease-out forwards; }
         @keyframes pageLoad { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
-        .pkg-card:active, .nav-item:active, .submit-btn:active, .back-btn:active { transform: scale(0.92) !important; transition: transform 0.1s ease !important; }
+        .pkg-card:active, .nav-item:active, .submit-btn:active, .back-btn:active, .check-name-btn:active { transform: scale(0.92) !important; transition: transform 0.1s ease !important; }
         
         .premium-header { display: flex; align-items: center; justify-content: center; padding: 20px; position: relative; background-color: #0b0f19; }
         .premium-header .back-btn { position: absolute; left: 20px; font-size: 20px; color: #ffffff; cursor: pointer; }
@@ -22,6 +22,11 @@
         .input-box input:focus { border-color: #3b82f6; }
         .input-box input.invalid { border-color: #ef4444 !important; background-color: rgba(239, 68, 68, 0.05); }
         .error-msg { color: #ef4444; font-size: 11px; margin-top: 5px; display: none; font-weight: 600; }
+
+        /* 👇 নতুন Name Check বাটনের ডিজাইন 👇 */
+        .check-name-btn { width: 100%; background-color: #991b1b; color: white; border: none; padding: 14px; border-radius: 8px; font-size: 14px; font-weight: bold; margin-top: 10px; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; letter-spacing: 0.5px; }
+        .check-name-btn:hover { background-color: #7f1d1d; }
+        .check-name-btn:disabled { opacity: 0.7; cursor: not-allowed; }
 
         /* 👇 সেভড আইডি চিপস ডিজাইন 👇 */
         .saved-ids-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
@@ -66,19 +71,22 @@
     </div>
     
     <div class="content-container">
-        <label class="section-label" id="input-label">Player UID / Tag</label>
+        <label class="section-label" id="input-label">Account Info (Player UID / Tag)</label>
         <div class="input-box">
             <input type="text" id="playerUid" placeholder="Enter Player ID/Tag" oninput="validatePlayerId()">
             <div id="error-msg" class="error-msg">Invalid Player ID</div>
+            
+            <!-- 👇 নতুন Name Check Button 👇 -->
+            <button id="check-name-btn" class="check-name-btn" onclick="checkPlayerName()">আপনার গেম আইডির নাম চেক করুন</button>
         </div>
         
         <!-- 👇 সেভড আইডি দেখানোর জায়গা 👇 -->
         <div id="saved-ids-box" class="saved-ids-container" style="display: none;"></div>
         
-        <label class="section-label" style="margin-top: 15px;">Player Name (optional)</label>
-        <div class="input-box"><input type="text" id="playerName" placeholder="Enter Player Name"></div>
+        <!-- Player Name ম্যানুয়াল ইনপুট বক্সটি হাইড করে API-এর ডাটার জন্য রাখা হলো -->
+        <input type="hidden" id="playerName" value="">
         
-        <label class="section-label">SELECT PACKAGE <i class="fa-solid fa-bolt" style="color: #3b82f6;"></i></label>
+        <label class="section-label" style="margin-top: 25px;">SELECT PACKAGE <i class="fa-solid fa-bolt" style="color: #3b82f6;"></i></label>
         <div class="package-grid" id="packages-container">
             <div style="grid-column: span 3; text-align: center; color: #94a3b8; font-size: 13px; padding: 20px;">প্যাকেজ লোড হচ্ছে...</div>
         </div>
@@ -153,10 +161,18 @@
         window.validatePlayerId = function() {
             let uidInput = document.getElementById('playerUid');
             let errorDiv = document.getElementById('error-msg');
+            let btnName = document.getElementById('check-name-btn');
             let val = uidInput.value.trim();
             let gName = gameName.toLowerCase();
 
             let isValid = true;
+
+            // আইডি পরিবর্তন করলে নাম চেকের বাটন আবার আগের মতো হয়ে যাবে
+            if(btnName && btnName.innerText !== "আপনার গেম আইডির নাম চেক করুন") {
+                btnName.innerHTML = "আপনার গেম আইডির নাম চেক করুন";
+                btnName.disabled = false;
+                document.getElementById('playerName').value = "";
+            }
 
             if (val.length === 0) {
                 isValid = false;
@@ -191,6 +207,34 @@
                 btn.disabled = false;
             } else {
                 btn.disabled = true;
+            }
+        }
+
+        // 👇 Name Check Logic 👇
+        window.checkPlayerName = async function() {
+            let uid = document.getElementById('playerUid').value.trim();
+            if (!uid || !window.isIdValid) return alert("দয়া করে সঠিক Player ID দিন!");
+            
+            let btn = document.getElementById('check-name-btn');
+            let originalText = "আপনার গেম আইডির নাম চেক করুন";
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> চেকিং হচ্ছে...';
+            btn.disabled = true;
+
+            try {
+                // Free Fire Name Check API
+                let response = await fetch(`https://api.isan.eu.org/nickname/ff?id=${uid}`);
+                let data = await response.json();
+
+                if (data && data.name) {
+                    btn.innerHTML = `${data.name} <i class="fa-solid fa-circle-info"></i>`;
+                    document.getElementById('playerName').value = data.name; 
+                } else {
+                    btn.innerHTML = 'নাম পাওয়া যায়নি! আবার চেষ্টা করুন';
+                    setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 3000);
+                }
+            } catch (error) {
+                btn.innerHTML = 'সার্ভার বিজি! Name Check Failed';
+                setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 3000);
             }
         }
 
