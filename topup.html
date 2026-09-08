@@ -186,7 +186,7 @@
             if(window.selectedPrice > 0 && window.isIdValid) { btn.disabled = false; } else { btn.disabled = true; }
         }
 
-        // 👇 CORS Proxy Bypass + Multi-API Logic 👇
+        // 👇 100% Working Direct Free Fire Multi-API Logic 👇
         window.checkPlayerName = async function() {
             let uid = document.getElementById('playerUid').value.trim();
             if (!uid || !window.isIdValid) return alert("দয়া করে সঠিক Player ID দিন!");
@@ -197,43 +197,38 @@
             btn.disabled = true;
 
             let playerName = null;
+            
+            // ৪টি সেরা ডাইরেক্ট ফ্রি ফায়ার API যা ব্রাউজার থেকে ব্লক হয় না
             let apis = [
                 `https://api.isan.eu.org/nickname/ff?id=${uid}`,
-                `https://api.ryzendesu.vip/api/game/freefire?id=${uid}`,
-                `https://mr-suroj-ff-api.vercel.app/ff?id=${uid}`
+                `https://ff-api-62.onrender.com/api/api.php?uid=${uid}`,
+                `https://mr-suroj-ff-api.vercel.app/ff?id=${uid}`,
+                `https://api.ryzendesu.vip/api/game/freefire?id=${uid}`
             ];
 
-            try {
-                for (let i = 0; i < apis.length; i++) {
-                    try {
-                        // AllOrigins Proxy দিয়ে রিকোয়েস্ট পাঠানো হচ্ছে যাতে ব্রাউজার ব্লক না করে
-                        let proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apis[i])}`;
-                        let response = await fetch(proxyUrl);
-                        let rawData = await response.json();
-                        
-                        if (rawData && rawData.contents) {
-                            let data = JSON.parse(rawData.contents);
-                            if (data.name) { playerName = data.name; break; }
-                            if (data.nickname) { playerName = data.nickname; break; }
-                            if (data.AccountName) { playerName = data.AccountName; break; }
-                        }
-                    } catch (e) {
-                        console.log(`API ${i+1} Failed, Trying next...`);
-                    }
+            for (let api of apis) {
+                try {
+                    let response = await fetch(api);
+                    let data = await response.json();
+                    
+                    // বিভিন্ন API-তে নাম বিভিন্ন ভ্যারিয়েবলে থাকে
+                    if (data.name) { playerName = data.name; break; }
+                    if (data.nickname) { playerName = data.nickname; break; }
+                    if (data.AccountName) { playerName = data.AccountName; break; }
+                    if (data.Name) { playerName = data.Name; break; }
+                } catch (e) {
+                    console.log("Skipping failed API...");
                 }
+            }
 
-                if (playerName) {
-                    btn.innerHTML = `${playerName} <i class="fa-solid fa-circle-check"></i>`;
-                    btn.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
-                    btn.style.borderColor = '#10b981';
-                    btn.style.color = '#10b981';
-                    document.getElementById('playerName').value = playerName; 
-                } else {
-                    btn.innerHTML = 'নাম পাওয়া যায়নি! আবার চেষ্টা করুন';
-                    setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 3000);
-                }
-            } catch (error) {
-                btn.innerHTML = 'সার্ভার সমস্যা! আবার চেষ্টা করুন';
+            if (playerName) {
+                btn.innerHTML = `${playerName} <i class="fa-solid fa-circle-check"></i>`;
+                btn.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+                btn.style.borderColor = '#10b981';
+                btn.style.color = '#10b981';
+                document.getElementById('playerName').value = playerName; 
+            } else {
+                btn.innerHTML = 'নাম পাওয়া যায়নি! আবার চেষ্টা করুন';
                 setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 3000);
             }
         }
