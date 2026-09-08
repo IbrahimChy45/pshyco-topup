@@ -23,12 +23,11 @@
         .input-box input.invalid { border-color: #ef4444 !important; background-color: rgba(239, 68, 68, 0.05); }
         .error-msg { color: #ef4444; font-size: 11px; margin-top: 5px; display: none; font-weight: 600; }
 
-        /* 👇 নতুন Name Check বাটনের ডিজাইন 👇 */
-        .check-name-btn { width: 100%; background-color: #991b1b; color: white; border: none; padding: 14px; border-radius: 8px; font-size: 14px; font-weight: bold; margin-top: 10px; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; letter-spacing: 0.5px; }
-        .check-name-btn:hover { background-color: #7f1d1d; }
+        /* 👇 নতুন Name Check বাটনের প্রিমিয়াম ব্লু থিম 👇 */
+        .check-name-btn { width: 100%; background-color: rgba(59, 130, 246, 0.08); color: #3b82f6; border: 1.5px solid #3b82f6; padding: 14px; border-radius: 8px; font-size: 14px; font-weight: bold; margin-top: 10px; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; letter-spacing: 0.5px; }
+        .check-name-btn:hover { background-color: rgba(59, 130, 246, 0.15); }
         .check-name-btn:disabled { opacity: 0.7; cursor: not-allowed; }
 
-        /* 👇 সেভড আইডি চিপস ডিজাইন 👇 */
         .saved-ids-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
         .saved-id-chip { background-color: #1e293b; border: 1px solid #334155; color: #94a3b8; padding: 5px 10px; border-radius: 15px; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
         .saved-id-chip:hover { border-color: #3b82f6; color: white; background-color: rgba(59, 130, 246, 0.1); }
@@ -76,7 +75,7 @@
             <input type="text" id="playerUid" placeholder="Enter Player ID/Tag" oninput="validatePlayerId()">
             <div id="error-msg" class="error-msg">Invalid Player ID</div>
             
-            <!-- 👇 নতুন Name Check Button 👇 -->
+            <!-- 👇 থিমের সাথে ম্যাচ করা Name Check Button 👇 -->
             <button id="check-name-btn" class="check-name-btn" onclick="checkPlayerName()">আপনার গেম আইডির নাম চেক করুন</button>
         </div>
         
@@ -120,7 +119,6 @@
         window.selectedDiamond = ""; window.selectedPrice = 0; window.selectedPkgName = "";
         window.isIdValid = false;
 
-        // 👇 সেভড আইডি রেন্ডার করার ফাংশন 👇
         function renderSavedIds() {
             let storageKey = 'saved_ids_' + dbNode;
             let savedIds = JSON.parse(localStorage.getItem(storageKey)) || [];
@@ -144,16 +142,14 @@
             }
         }
 
-        // পেজ লোড হওয়ার সাথে সাথে সেভড আইডি চেক করা
         window.addEventListener('DOMContentLoaded', renderSavedIds);
 
-        // আইডি সেভ করার ফাংশন
         function savePlayerId(id) {
             let storageKey = 'saved_ids_' + dbNode;
             let savedIds = JSON.parse(localStorage.getItem(storageKey)) || [];
             if (!savedIds.includes(id)) {
-                savedIds.unshift(id); // নতুন আইডি সবার উপরে যোগ হবে
-                if (savedIds.length > 4) savedIds.pop(); // সর্বোচ্চ ৪টি আইডি সেভ থাকবে
+                savedIds.unshift(id);
+                if (savedIds.length > 4) savedIds.pop();
                 localStorage.setItem(storageKey, JSON.stringify(savedIds));
             }
         }
@@ -167,10 +163,11 @@
 
             let isValid = true;
 
-            // আইডি পরিবর্তন করলে নাম চেকের বাটন আবার আগের মতো হয়ে যাবে
+            // আইডি পরিবর্তন করলে বাটনের ডিজাইন ও লেখা রিসেট হবে
             if(btnName && btnName.innerText !== "আপনার গেম আইডির নাম চেক করুন") {
                 btnName.innerHTML = "আপনার গেম আইডির নাম চেক করুন";
                 btnName.disabled = false;
+                btnName.style = ''; // বাটনের কাস্টম কালার রিসেট
                 document.getElementById('playerName').value = "";
             }
 
@@ -201,7 +198,6 @@
 
             window.isIdValid = isValid;
             
-            // প্যাকেজ সিলেক্ট করা থাকলে এবং আইডি ভ্যালিড হলে বাটন অন হবে
             let btn = document.getElementById('submit-btn');
             if(window.selectedPrice > 0 && window.isIdValid) {
                 btn.disabled = false;
@@ -210,7 +206,7 @@
             }
         }
 
-        // 👇 Name Check Logic 👇
+        // 👇 Multi-API Name Check Logic (খুবই শক্তিশালী) 👇
         window.checkPlayerName = async function() {
             let uid = document.getElementById('playerUid').value.trim();
             if (!uid || !window.isIdValid) return alert("দয়া করে সঠিক Player ID দিন!");
@@ -221,19 +217,42 @@
             btn.disabled = true;
 
             try {
-                // Free Fire Name Check API
-                let response = await fetch(`https://api.isan.eu.org/nickname/ff?id=${uid}`);
-                let data = await response.json();
+                let playerName = null;
+                // ৪টি আলাদা আলাদা API সার্ভার দিয়ে লুপ চলবে, যেকোনো একটা ডাউন থাকলেও অন্যটা দিয়ে নাম চলে আসবে
+                let apiList = [
+                    `https://api.ryzendesu.vip/api/game/freefire?id=${uid}`,
+                    `https://mr-suroj-ff-api.vercel.app/ff?id=${uid}`,
+                    `https://fs-api.vercel.app/ff?id=${uid}`,
+                    `https://api.isan.eu.org/nickname/ff?id=${uid}`
+                ];
 
-                if (data && data.name) {
-                    btn.innerHTML = `${data.name} <i class="fa-solid fa-circle-info"></i>`;
-                    document.getElementById('playerName').value = data.name; 
+                for (let api of apiList) {
+                    try {
+                        let response = await fetch(api);
+                        let data = await response.json();
+                        // বিভিন্ন API বিভিন্ন ভ্যারিয়েবল ব্যবহার করে, তাই সবগুলো চেক করা হচ্ছে
+                        if (data.name) { playerName = data.name; break; }
+                        else if (data.nickname) { playerName = data.nickname; break; }
+                        else if (data.AccountName) { playerName = data.AccountName; break; }
+                        else if (data.userName) { playerName = data.userName; break; }
+                    } catch(err) {
+                        console.log("Next API Trial..."); // প্রথম সার্ভার ফেল করলে পরেরটা খুঁজবে
+                    }
+                }
+
+                if (playerName) {
+                    btn.innerHTML = `${playerName} <i class="fa-solid fa-circle-check"></i>`;
+                    // নাম পেলে বাটনটি হালকা সুন্দর সবুজ রঙের হয়ে যাবে
+                    btn.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+                    btn.style.borderColor = '#10b981';
+                    btn.style.color = '#10b981';
+                    document.getElementById('playerName').value = playerName; 
                 } else {
-                    btn.innerHTML = 'নাম পাওয়া যায়নি! আবার চেষ্টা করুন';
+                    btn.innerHTML = 'সার্ভার বিজি! আবার চেষ্টা করুন';
                     setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 3000);
                 }
             } catch (error) {
-                btn.innerHTML = 'সার্ভার বিজি! Name Check Failed';
+                btn.innerHTML = 'Name Check Failed!';
                 setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 3000);
             }
         }
