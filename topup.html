@@ -23,7 +23,7 @@
         .input-box input.invalid { border-color: #ef4444 !important; background-color: rgba(239, 68, 68, 0.05); }
         .error-msg { color: #ef4444; font-size: 11px; margin-top: 5px; display: none; font-weight: 600; }
 
-        /* 👇 নতুন Name Check বাটনের প্রিমিয়াম ব্লু থিম 👇 */
+        /* 👇 Name Check বাটনের প্রিমিয়াম ব্লু থিম 👇 */
         .check-name-btn { width: 100%; background-color: rgba(59, 130, 246, 0.08); color: #3b82f6; border: 1.5px solid #3b82f6; padding: 14px; border-radius: 8px; font-size: 14px; font-weight: bold; margin-top: 10px; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; letter-spacing: 0.5px; }
         .check-name-btn:hover { background-color: rgba(59, 130, 246, 0.15); }
         .check-name-btn:disabled { opacity: 0.7; cursor: not-allowed; }
@@ -72,17 +72,14 @@
     <div class="content-container">
         <label class="section-label" id="input-label">Account Info (Player UID / Tag)</label>
         <div class="input-box">
-            <input type="text" id="playerUid" placeholder="Enter Player ID/Tag" oninput="validatePlayerId()">
+            <input type="number" id="playerUid" placeholder="Enter Player ID/Tag" oninput="validatePlayerId()">
             <div id="error-msg" class="error-msg">Invalid Player ID</div>
             
             <!-- 👇 থিমের সাথে ম্যাচ করা Name Check Button 👇 -->
             <button id="check-name-btn" class="check-name-btn" onclick="checkPlayerName()">আপনার গেম আইডির নাম চেক করুন</button>
         </div>
         
-        <!-- 👇 সেভড আইডি দেখানোর জায়গা 👇 -->
         <div id="saved-ids-box" class="saved-ids-container" style="display: none;"></div>
-        
-        <!-- Player Name ম্যানুয়াল ইনপুট বক্সটি হাইড করে API-এর ডাটার জন্য রাখা হলো -->
         <input type="hidden" id="playerName" value="">
         
         <label class="section-label" style="margin-top: 25px;">SELECT PACKAGE <i class="fa-solid fa-bolt" style="color: #3b82f6;"></i></label>
@@ -137,9 +134,7 @@
                     };
                     container.appendChild(chip);
                 });
-            } else {
-                container.style.display = 'none';
-            }
+            } else { container.style.display = 'none'; }
         }
 
         window.addEventListener('DOMContentLoaded', renderSavedIds);
@@ -160,14 +155,12 @@
             let btnName = document.getElementById('check-name-btn');
             let val = uidInput.value.trim();
             let gName = gameName.toLowerCase();
-
             let isValid = true;
 
-            // আইডি পরিবর্তন করলে বাটনের ডিজাইন ও লেখা রিসেট হবে
             if(btnName && btnName.innerText !== "আপনার গেম আইডির নাম চেক করুন") {
                 btnName.innerHTML = "আপনার গেম আইডির নাম চেক করুন";
                 btnName.disabled = false;
-                btnName.style = ''; // বাটনের কাস্টম কালার রিসেট
+                btnName.style = ''; 
                 document.getElementById('playerName').value = "";
             }
 
@@ -176,83 +169,71 @@
                 errorDiv.style.display = 'none';
                 uidInput.classList.remove('invalid');
             } else {
-                if (gName.includes('free fire')) {
-                    if (!/^\d{8,10}$/.test(val)) { isValid = false; }
-                } else if (gName.includes('pubg')) {
-                    if (!/^\d{8,11}$/.test(val)) { isValid = false; }
-                } else if (gName.includes('call of duty') || gName.includes('cod')) {
-                    if (val.length < 6 || val.length > 15) { isValid = false; }
-                } else {
-                    if (val.length < 5) { isValid = false; }
-                }
+                if (gName.includes('free fire')) { if (!/^\d{8,10}$/.test(val)) isValid = false; } 
+                else if (gName.includes('pubg')) { if (!/^\d{8,11}$/.test(val)) isValid = false; } 
+                else if (gName.includes('call of duty') || gName.includes('cod')) { if (val.length < 6 || val.length > 15) isValid = false; } 
+                else { if (val.length < 5) isValid = false; }
 
                 if (!isValid) {
-                    uidInput.classList.add('invalid');
-                    errorDiv.innerText = `Invalid ${gameName} Player ID`;
-                    errorDiv.style.display = 'block';
+                    uidInput.classList.add('invalid'); errorDiv.innerText = `Invalid ${gameName} Player ID`; errorDiv.style.display = 'block';
                 } else {
-                    uidInput.classList.remove('invalid');
-                    errorDiv.style.display = 'none';
+                    uidInput.classList.remove('invalid'); errorDiv.style.display = 'none';
                 }
             }
 
             window.isIdValid = isValid;
-            
             let btn = document.getElementById('submit-btn');
-            if(window.selectedPrice > 0 && window.isIdValid) {
-                btn.disabled = false;
-            } else {
-                btn.disabled = true;
-            }
+            if(window.selectedPrice > 0 && window.isIdValid) { btn.disabled = false; } else { btn.disabled = true; }
         }
 
-        // 👇 Multi-API Name Check Logic (খুবই শক্তিশালী) 👇
+        // 👇 CORS Proxy Bypass + Multi-API Logic 👇
         window.checkPlayerName = async function() {
             let uid = document.getElementById('playerUid').value.trim();
             if (!uid || !window.isIdValid) return alert("দয়া করে সঠিক Player ID দিন!");
             
             let btn = document.getElementById('check-name-btn');
             let originalText = "আপনার গেম আইডির নাম চেক করুন";
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> চেকিং হচ্ছে...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> সার্ভারে খোঁজা হচ্ছে...';
             btn.disabled = true;
 
-            try {
-                let playerName = null;
-                // ৪টি আলাদা আলাদা API সার্ভার দিয়ে লুপ চলবে, যেকোনো একটা ডাউন থাকলেও অন্যটা দিয়ে নাম চলে আসবে
-                let apiList = [
-                    `https://api.ryzendesu.vip/api/game/freefire?id=${uid}`,
-                    `https://mr-suroj-ff-api.vercel.app/ff?id=${uid}`,
-                    `https://fs-api.vercel.app/ff?id=${uid}`,
-                    `https://api.isan.eu.org/nickname/ff?id=${uid}`
-                ];
+            let playerName = null;
+            let apis = [
+                `https://api.isan.eu.org/nickname/ff?id=${uid}`,
+                `https://api.ryzendesu.vip/api/game/freefire?id=${uid}`,
+                `https://mr-suroj-ff-api.vercel.app/ff?id=${uid}`
+            ];
 
-                for (let api of apiList) {
+            try {
+                for (let i = 0; i < apis.length; i++) {
                     try {
-                        let response = await fetch(api);
-                        let data = await response.json();
-                        // বিভিন্ন API বিভিন্ন ভ্যারিয়েবল ব্যবহার করে, তাই সবগুলো চেক করা হচ্ছে
-                        if (data.name) { playerName = data.name; break; }
-                        else if (data.nickname) { playerName = data.nickname; break; }
-                        else if (data.AccountName) { playerName = data.AccountName; break; }
-                        else if (data.userName) { playerName = data.userName; break; }
-                    } catch(err) {
-                        console.log("Next API Trial..."); // প্রথম সার্ভার ফেল করলে পরেরটা খুঁজবে
+                        // AllOrigins Proxy দিয়ে রিকোয়েস্ট পাঠানো হচ্ছে যাতে ব্রাউজার ব্লক না করে
+                        let proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apis[i])}`;
+                        let response = await fetch(proxyUrl);
+                        let rawData = await response.json();
+                        
+                        if (rawData && rawData.contents) {
+                            let data = JSON.parse(rawData.contents);
+                            if (data.name) { playerName = data.name; break; }
+                            if (data.nickname) { playerName = data.nickname; break; }
+                            if (data.AccountName) { playerName = data.AccountName; break; }
+                        }
+                    } catch (e) {
+                        console.log(`API ${i+1} Failed, Trying next...`);
                     }
                 }
 
                 if (playerName) {
                     btn.innerHTML = `${playerName} <i class="fa-solid fa-circle-check"></i>`;
-                    // নাম পেলে বাটনটি হালকা সুন্দর সবুজ রঙের হয়ে যাবে
                     btn.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
                     btn.style.borderColor = '#10b981';
                     btn.style.color = '#10b981';
                     document.getElementById('playerName').value = playerName; 
                 } else {
-                    btn.innerHTML = 'সার্ভার বিজি! আবার চেষ্টা করুন';
+                    btn.innerHTML = 'নাম পাওয়া যায়নি! আবার চেষ্টা করুন';
                     setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 3000);
                 }
             } catch (error) {
-                btn.innerHTML = 'Name Check Failed!';
+                btn.innerHTML = 'সার্ভার সমস্যা! আবার চেষ্টা করুন';
                 setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 3000);
             }
         }
@@ -320,9 +301,7 @@
             if (currentBalance < window.selectedPrice) { alert("Insufficient balance! Please Add Money."); window.location.href = "addmoney.html"; return; }
             let submitBtn = document.getElementById('submit-btn'); submitBtn.innerText = "Processing..."; submitBtn.disabled = true;
             try {
-                // সফল অর্ডার হলে আইডি সেভ করে নেওয়া
                 savePlayerId(uid);
-
                 await update(ref(db, 'users/' + currentUser.uid), { balance: currentBalance - window.selectedPrice });
                 
                 const orderData = { 
@@ -343,7 +322,6 @@
                 const message = `🎮 *New ${gameName} Order*\n\n👤 *User:* ${orderData.userPhone}\n💎 *Package:* ${orderData.packageName}\n💵 *Price:* ৳${orderData.price}\n🆔 *Player ID:* ${orderData.playerId}\n📝 *Name:* ${orderData.playerName}\n⚙️ *Status:* Pending`;
                 fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}&parse_mode=Markdown`);
                 
-                // Vercel Push Notification 
                 const adminFCMToken = "CVRyAd3NFuUaotb8ULL-d8:APA91bFbSQhBqiYwK59al9bDX1o7wVWO8NxW5guo4Zr14aPDqpX3b2Aw-vfhgV8CCvKmJkqxbY3NfoxhILY_5ovgirpiVFhv47FV9Cj4zooV3KRCKV69NG8";
                 fetch("https://pshyco-topup-knvh.vercel.app/api/notify", {
                     method: "POST",
