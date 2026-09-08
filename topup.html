@@ -23,7 +23,6 @@
         .input-box input.invalid { border-color: #ef4444 !important; background-color: rgba(239, 68, 68, 0.05); }
         .error-msg { color: #ef4444; font-size: 11px; margin-top: 5px; display: none; font-weight: 600; }
 
-        /* 👇 Name Check বাটনের প্রিমিয়াম ব্লু থিম 👇 */
         .check-name-btn { width: 100%; background-color: rgba(59, 130, 246, 0.08); color: #3b82f6; border: 1.5px solid #3b82f6; padding: 14px; border-radius: 8px; font-size: 14px; font-weight: bold; margin-top: 10px; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; letter-spacing: 0.5px; }
         .check-name-btn:hover { background-color: rgba(59, 130, 246, 0.15); }
         .check-name-btn:disabled { opacity: 0.7; cursor: not-allowed; }
@@ -106,13 +105,22 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const gameName = urlParams.get('name') || 'Free Fire'; // ডিফল্ট নাম Free Fire
-        const dbNode = urlParams.get('db') || 'freefire_packages';
+        let dbNode = urlParams.get('db') || 'freefire_packages';
+        let gameName = urlParams.get('name');
 
-        // 👇 ডাবল TOP UP ফিক্স করা হলো 👇
-        let titleDisplay = gameName.toLowerCase() === 'top up' ? 'GAME' : gameName;
-        document.getElementById('dynamic-title').innerHTML = `${titleDisplay} <span>TOP UP</span>`;
-        document.title = `${titleDisplay} Top Up`;
+        // 👇 স্মার্ট গেম ডিটেকশন (যাতে হেডিং ভুল না হয়) 👇
+        if (!gameName || gameName.toLowerCase() === 'top up') {
+            if (dbNode.includes('pubg')) {
+                gameName = 'PUBG';
+            } else if (dbNode.includes('cod') || dbNode.includes('callofduty')) {
+                gameName = 'Call of Duty';
+            } else {
+                gameName = 'Free Fire';
+            }
+        }
+
+        document.getElementById('dynamic-title').innerHTML = `${gameName} <span>TOP UP</span>`;
+        document.title = `${gameName} Top Up`;
 
         window.selectedDiamond = ""; window.selectedPrice = 0; window.selectedPkgName = "";
         window.isIdValid = false;
