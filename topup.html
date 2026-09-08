@@ -106,11 +106,13 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const gameName = urlParams.get('name') || 'Top Up';
+        const gameName = urlParams.get('name') || 'Free Fire'; // ডিফল্ট নাম Free Fire
         const dbNode = urlParams.get('db') || 'freefire_packages';
 
-        document.getElementById('dynamic-title').innerHTML = `${gameName} <span>TOP UP</span>`;
-        document.title = `${gameName} Top Up`;
+        // 👇 ডাবল TOP UP ফিক্স করা হলো 👇
+        let titleDisplay = gameName.toLowerCase() === 'top up' ? 'GAME' : gameName;
+        document.getElementById('dynamic-title').innerHTML = `${titleDisplay} <span>TOP UP</span>`;
+        document.title = `${titleDisplay} Top Up`;
 
         window.selectedDiamond = ""; window.selectedPrice = 0; window.selectedPkgName = "";
         window.isIdValid = false;
@@ -184,7 +186,6 @@
             if(window.selectedPrice > 0 && window.isIdValid) { btn.disabled = false; } else { btn.disabled = true; }
         }
 
-        // 👇 আল্টিমেট 3-Layer Bypass Name Check Logic 👇
         window.checkPlayerName = async function() {
             let uid = document.getElementById('playerUid').value.trim();
             if (!uid || !window.isIdValid) return alert("দয়া করে সঠিক Player ID দিন!");
@@ -210,7 +211,7 @@
                 ];
             }
 
-            // লেয়ার ১: ডাইরেক্ট ফেচ (ব্রাউজার ব্লক না করলে কাজ করবে)
+            // লেয়ার ১: ডাইরেক্ট ফেচ
             for (let api of apis) {
                 try {
                     let response = await fetch(api);
@@ -220,7 +221,7 @@
                 } catch (e) {}
             }
 
-            // লেয়ার ২: CorsProxy বাইপাস (ব্রাউজার ব্লক করলে এটি কাজ করবে)
+            // লেয়ার ২: CorsProxy বাইপাস 
             if (!playerName) {
                 for (let api of apis) {
                     try {
@@ -232,7 +233,7 @@
                 }
             }
 
-            // লেয়ার ৩: AllOrigins বাইপাস (শেষ চেষ্টা)
+            // লেয়ার ৩: AllOrigins বাইপাস 
             if (!playerName) {
                 for (let api of apis) {
                     try {
