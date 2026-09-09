@@ -224,8 +224,12 @@
         </div>
     </div>
 
-    <!-- UI & Pull to Refresh Script -->
+    <!-- UI, Preloaded Audio & Pull to Refresh Script -->
     <script>
+        // গ্লোবাল প্রিলোডেড অডিও অবজেক্ট
+        const adminAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2870/2870-preview.mp3');
+        adminAudio.load();
+
         function openTab(tabId, element) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -257,8 +261,6 @@
                 }
             }
         }, {passive: true});
-
-        document.getElementById('body-swipe').addEventListener('touched', e => {}, {passive: true});
 
         document.getElementById('body-swipe').addEventListener('touchend', e => {
             let diffX = touchStartX - e.changedTouches[0].screenX;
@@ -302,18 +304,28 @@
         });
 
         function enableAudioAndVibration() {
-            let audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2870/2870-preview.mp3');
-            audio.play().then(() => {
-                audioUnlocked = true;
-                localStorage.setItem('admin_sound_enabled', 'true');
-                let btn = document.getElementById('soundToggleBtn');
+            let btn = document.getElementById('soundToggleBtn');
+            if (localStorage.getItem('admin_sound_enabled') === 'true') {
+                localStorage.setItem('admin_sound_enabled', 'false');
+                audioUnlocked = false;
                 if (btn) {
-                    btn.innerHTML = '<i class="fa-solid fa-volume-high"></i> Sound On';
-                    btn.className = 'sound-enable-btn enabled';
+                    btn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i> Sound Off';
+                    btn.className = 'sound-enable-btn';
                 }
-            }).catch(e => {
-                alert("Please interact again to enable sound!");
-            });
+            } else {
+                adminAudio.play().then(() => {
+                    adminAudio.pause();
+                    adminAudio.currentTime = 0;
+                    audioUnlocked = true;
+                    localStorage.setItem('admin_sound_enabled', 'true');
+                    if (btn) {
+                        btn.innerHTML = '<i class="fa-solid fa-volume-high"></i> Sound On';
+                        btn.className = 'sound-enable-btn enabled';
+                    }
+                }).catch(e => {
+                    alert("ব্রাউজার সাউন্ড ব্লক করেছে। স্ক্রিনে আবার ট্যাপ করুন।");
+                });
+            }
 
             if ("vibrate" in navigator) {
                 try { navigator.vibrate(100); } catch(e) {}
@@ -480,8 +492,8 @@
                 
                 if (localStorage.getItem('admin_sound_enabled') === 'true') {
                     try { 
-                        let audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2870/2870-preview.mp3'); 
-                        audio.play(); 
+                        adminAudio.currentTime = 0;
+                        adminAudio.play().catch(err => console.log("Audio play error:", err)); 
                     } catch(e) {} 
                 }
                 
