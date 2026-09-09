@@ -54,9 +54,15 @@
         .user-card div { display: flex; flex-direction: column; gap: 3px; }
         .user-card b { font-size: 14px; color: white; }
         .user-card span { font-size: 11px; color: #94a3b8; }
+
+        /* Pull to Refresh Spinner Style */
+        #refresh-spinner { position: fixed; top: -50px; left: 50%; transform: translateX(-50%); background-color: #1e293b; color: #3b82f6; padding: 8px 16px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 99999; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 8px; border: 1px solid #334155; transition: top 0.3s ease; }
     </style>
 </head>
 <body id="body-swipe">
+
+    <!-- Pull to Refresh Indicator -->
+    <div id="refresh-spinner"><i class="fa-solid fa-rotate fa-spin"></i> রিফ্রেশ হচ্ছে...</div>
 
     <div id="notification-banner" onclick="this.style.display='none'">
         <i class="fa-solid fa-bell fa-shake" style="color: #fde047; margin-right: 5px;"></i> 
@@ -172,7 +178,7 @@
 
         <div class="admin-section" style="border-color: #f59e0b; background-color: rgba(245, 158, 11, 0.05);">
             <h3 class="section-title" style="color: #f59e0b; border-bottom-color: rgba(245, 158, 11, 0.2);"><i class="fa-solid fa-person-digging"></i> Maintenance Mode</h3>
-            <p style="font-size: 11px; color: #94a3b8; margin-top:-5px; margin-bottom: 12px;">এটি অন করলে ইউজাররা অ্যাপে ঢুকতে বা কোনো কাজ করতে পারবে না।</p>
+            <p style="font-size: 11px; color: #94a3b8; margin-top:-5px; margin-bottom: 12px;">এটি অন করলে ইউজাররা অ্যাপে ঢুকতে বা কোনো কাজ করতে পারবে্বা না।</p>
             <input type="text" id="admin-maintenance-msg" class="input-dark" placeholder="Message: e.g. সার্ভার আপডেট চলছে...">
             <div style="display: flex; gap: 10px; margin-top: 10px;">
                 <button onclick="window.toggleMaintenance(true)" class="submit-btn" style="background-color: #f59e0b; color: white;"><i class="fa-solid fa-lock"></i> Turn ON</button>
@@ -210,7 +216,7 @@
         </div>
     </div>
 
-    <!-- UI Script -->
+    <!-- UI & Pull to Refresh Script -->
     <script>
         function openTab(tabId, element) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
@@ -219,14 +225,55 @@
             element.classList.add('active');
         }
 
-        let touchStartX = 0; const tabIds = ['tab-dashboard', 'tab-orders', 'tab-content', 'tab-settings']; const btnIds = ['btn-tab-dashboard', 'btn-tab-orders', 'btn-tab-content', 'btn-tab-settings'];
-        document.getElementById('body-swipe').addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
+        // Horizontal Swipe + Vertical Pull to Refresh Logic
+        let touchStartX = 0; 
+        let touchStartY = 0;
+        let pullStartY = 0;
+        const spinner = document.getElementById('refresh-spinner');
+        const tabIds = ['tab-dashboard', 'tab-orders', 'tab-content', 'tab-settings']; 
+        const btnIds = ['btn-tab-dashboard', 'btn-tab-orders', 'btn-tab-content', 'btn-tab-settings'];
+        
+        document.getElementById('body-swipe').addEventListener('touchstart', e => { 
+            touchStartX = e.changedTouches[0].screenX; 
+            touchStartY = e.changedTouches[0].screenY;
+            if (window.scrollY === 0) { pullStartY = e.touches[0].clientY; }
+        }, {passive: true});
+
+        document.getElementById('body-swipe').addEventListener('touchmove', e => {
+            if (window.scrollY === 0 && pullStartY > 0) {
+                let currentY = e.touches[0].clientY;
+                let diffY = currentY - pullStartY;
+                if (diffY > 70 && diffY < 150) { 
+                    spinner.style.top = '20px'; 
+                }
+            }
+        }, {passive: true});
+
         document.getElementById('body-swipe').addEventListener('touchend', e => {
-            let diff = touchStartX - e.changedTouches[0].screenX;
-            if (Math.abs(diff) > 70) {
+            // Horizontal Tab Switching Logic
+            let diffX = touchStartX - e.changedTouches[0].screenX;
+            let diffY = Math.abs(touchStartY - e.changedTouches[0].screenY);
+            
+            // নিচের দিকে টানার সময় যাতে ট্যাব পাল্টে না যায় তার জন্য diffY < 50 অ্যাড করা হয়েছে
+            if (Math.abs(diffX) > 70 && diffY < 50) {
                 let currentIndex = tabIds.findIndex(id => document.getElementById(id).classList.contains('active'));
-                if (diff > 0 && currentIndex < tabIds.length - 1) { openTab(tabIds[currentIndex + 1], document.getElementById(btnIds[currentIndex + 1])); document.getElementById(btnIds[currentIndex + 1]).scrollIntoView({ behavior: 'smooth', inline: 'center' }); } 
-                else if (diff < 0 && currentIndex > 0) { openTab(tabIds[currentIndex - 1], document.getElementById(btnIds[currentIndex - 1])); document.getElementById(btnIds[currentIndex - 1]).scrollIntoView({ behavior: 'smooth', inline: 'center' }); }
+                if (diffX > 0 && currentIndex < tabIds.length - 1) { 
+                    openTab(tabIds[currentIndex + 1], document.getElementById(btnIds[currentIndex + 1])); 
+                    document.getElementById(btnIds[currentIndex + 1]).scrollIntoView({ behavior: 'smooth', inline: 'center' }); 
+                } 
+                else if (diffX < 0 && currentIndex > 0) { 
+                    openTab(tabIds[currentIndex - 1], document.getElementById(btnIds[currentIndex - 1])); 
+                    document.getElementById(btnIds[currentIndex - 1]).scrollIntoView({ behavior: 'smooth', inline: 'center' }); 
+                }
+            }
+
+            // Pull to Refresh Logic
+            if (spinner.style.top === '20px') {
+                spinner.innerHTML = `<i class="fa-solid fa-rotate fa-spin"></i> রিলোড হচ্ছে...`;
+                setTimeout(() => { window.location.reload(); }, 500);
+            } else { 
+                spinner.style.top = '-50px'; 
+                pullStartY = 0;
             }
         });
 
@@ -278,7 +325,6 @@
             try {
                 const permission = await Notification.requestPermission();
                 if (permission === 'granted') {
-                    // 👇 আপনার দেওয়া VAPID Key ঠিক এই লাইনে বসানো হয়েছে 👇
                     const token = await getToken(messaging, { vapidKey: "BGEo2gDYcr6ZRUBHsyGrVB6dkJp6QhuzxHIDl4ug13YR4b5N-aJIq5e9AFM3lBrAPoI1uUKOJV3WWNe1WMK32tA" });
                     
                     if (token) {
