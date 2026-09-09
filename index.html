@@ -326,20 +326,24 @@
             } else { grid.innerHTML = '<p style="grid-column: span 3; text-align: center; color: #ef4444; font-size: 12px;">No games available!</p>'; }
         });
 
-        // 👇 ম্যাজিক অটো-লিংক জেনারেটর (হট অফারস) 👇
+        // 👇 ম্যাজিক অটো-লিংক জেনারেটর (হট অফারস - আপডেটেড) 👇
         onValue(ref(db, 'hot_offers'), (snapshot) => {
             const container = document.getElementById('dynamic-hot-offers'); container.innerHTML = ''; 
             if (snapshot.exists()) {
                 snapshot.forEach(child => {
                     const offer = child.val();
                     
-                    let targetLink = offer.link;
-                    if(targetLink && targetLink.includes('topup.html') && !targetLink.includes('?name=')) {
-                        let offTitle = (offer.title || "").toLowerCase();
-                        if(offTitle.includes('pubg')) targetLink = 'topup.html?name=PUBG&db=pubg_packages';
-                        else if(offTitle.includes('call of duty') || offTitle.includes('cod')) targetLink = 'topup.html?name=Call of Duty&db=cod_packages';
-                        else targetLink = 'topup.html?name=Free Fire&db=freefire_packages';
-                    }
+                    // হট অফারের জন্য অটোমেটিক ডেডিকেটেড hotoffer.html লিংক তৈরি 
+                    let gameName = "Free Fire"; 
+                    let offTitle = (offer.title || "").toLowerCase();
+                    let pkgTitle = offer.title || "Special Offer";
+                    let price = offer.newPrice || "0";
+                    
+                    if(offTitle.includes('pubg')) gameName = "PUBG";
+                    else if(offTitle.includes('call of duty') || offTitle.includes('cod')) gameName = "Call of Duty";
+                    
+                    // ফায়ারবেসে আগের topup.html লিংক থাকলেও সিস্টেম অটোমেটিক hotoffer.html এ পাঠিয়ে দিবে
+                    let targetLink = `hotoffer.html?game=${encodeURIComponent(gameName)}&pkg=${encodeURIComponent(pkgTitle)}&price=${price}`;
 
                     container.innerHTML += `
                     <div onclick="window.location.href='${targetLink}'" style="background: linear-gradient(90deg, #151b29 0%, #1e293b 100%); border-left: 4px solid #ef4444; border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
