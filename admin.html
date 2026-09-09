@@ -239,7 +239,6 @@
         let pullStartY = 0;
         const spinner = document.getElementById('refresh-spinner');
         
-        // Updated Tab Arrays for Swipe Logic
         const tabIds = ['tab-dashboard', 'tab-orders', 'tab-addmoney', 'tab-content', 'tab-settings']; 
         const btnIds = ['btn-tab-dashboard', 'btn-tab-orders', 'btn-tab-addmoney', 'btn-tab-content', 'btn-tab-settings'];
         
@@ -259,6 +258,8 @@
             }
         }, {passive: true});
 
+        document.getElementById('body-swipe').addEventListener('touched', e => {}, {passive: true});
+
         document.getElementById('body-swipe').addEventListener('touchend', e => {
             let diffX = touchStartX - e.changedTouches[0].screenX;
             let diffY = Math.abs(touchStartY - e.changedTouches[0].screenY);
@@ -276,7 +277,7 @@
             }
 
             if (spinner.style.top === '20px') {
-                spinner.innerHTML = `<i class="fa-solid fa-rotate fa-spin"></i> রিলোড হচ্ছে...`;
+                spinner.innerHTML = `<i class="fa-solid fa-rotate fa-spin"></i> রিফ্রেশ হচ্ছে...`;
                 setTimeout(() => { window.location.reload(); }, 500);
             } else { 
                 spinner.style.top = '-50px'; 
@@ -284,14 +285,32 @@
             }
         });
 
-        let audioUnlocked = false;
+        // Persistent Sound State Logic
+        let audioUnlocked = localStorage.getItem('admin_sound_enabled') === 'true';
+
+        window.addEventListener('DOMContentLoaded', () => {
+            let btn = document.getElementById('soundToggleBtn');
+            if (btn) {
+                if (audioUnlocked) {
+                    btn.innerHTML = '<i class="fa-solid fa-volume-high"></i> Sound On';
+                    btn.className = 'sound-enable-btn enabled';
+                } else {
+                    btn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i> Sound Off';
+                    btn.className = 'sound-enable-btn';
+                }
+            }
+        });
+
         function enableAudioAndVibration() {
             let audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2870/2870-preview.mp3');
             audio.play().then(() => {
                 audioUnlocked = true;
+                localStorage.setItem('admin_sound_enabled', 'true');
                 let btn = document.getElementById('soundToggleBtn');
-                btn.innerHTML = '<i class="fa-solid fa-volume-high"></i> Sound On';
-                btn.className = 'sound-enable-btn enabled';
+                if (btn) {
+                    btn.innerHTML = '<i class="fa-solid fa-volume-high"></i> Sound On';
+                    btn.className = 'sound-enable-btn enabled';
+                }
             }).catch(e => {
                 alert("Please interact again to enable sound!");
             });
@@ -458,7 +477,14 @@
                 document.getElementById('noti-text').innerText = message; 
                 banner.style.display = 'block'; 
                 if ("vibrate" in navigator) { try { navigator.vibrate([200, 100, 200, 100, 200]); } catch(e) {} }
-                try { let audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2870/2870-preview.mp3'); audio.play(); } catch(e) {} 
+                
+                if (localStorage.getItem('admin_sound_enabled') === 'true') {
+                    try { 
+                        let audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2870/2870-preview.mp3'); 
+                        audio.play(); 
+                    } catch(e) {} 
+                }
+                
                 setTimeout(() => { banner.style.display = 'none'; }, 5000); 
             }
 
@@ -553,11 +579,10 @@
         window.deleteItem = async (path, key) => { if(confirm("Are you sure you want to delete this?")) await remove(ref(db, `${path}/${key}`)); }
         window.approveMoney = async (reqId, uid, amount) => { if(confirm(`Approve adding ৳${amount}?`)) { await update(ref(db, `add_money_requests/${reqId}`), { status: 'Completed' }); const snap = await get(ref(db, `users/${uid}`)); let currentBal = (snap.exists() && snap.val().balance) ? Number(snap.val().balance) : 0; await update(ref(db, `users/${uid}`), { balance: currentBal + Number(amount) }); alert("Successfully added balance!"); } }
         
-        // 👇 আপডেটেড রিসেট ডাটা ফাংশন (যেখানে অ্যাড মানি সুরক্ষিত আছে) 👇
         window.resetAllData = async () => { 
             if(confirm("সতর্কতা! শুধুমাত্র সমস্ত গেম অর্ডার মুছে ফেলতে চান? (অ্যাড মানি হিস্টোরি ডিলিট হবে না)")) { 
                 try { 
-                    await remove(ref(db, 'orders')); // শুধু গেম অর্ডার ডিলিট হবে
+                    await remove(ref(db, 'orders')); 
                     alert("গেম অর্ডারের সমস্ত রেকর্ড মুছে ফেলা হয়েছে! অ্যাড মানি হিস্টোরি সুরক্ষিত আছে।"); 
                     document.getElementById('stat-total-orders').innerText = "0"; 
                     document.getElementById('stat-pending').innerText = "0"; 
@@ -590,7 +615,7 @@
                 let currentBal = snap.exists() ? Number(snap.val()) : 0; await set(balRef, currentBal + amount); 
                 alert(`✅ সাফল্য! অ্যাকাউন্টে ৳${amount} অ্যাড করা হয়েছে।`); 
                 document.getElementById('user-email').value = ""; document.getElementById('add-amount').value = ""; 
-            } else { alert("❌ অ্যাকাউন্ট পাওয়া যায়নি! জিমেইল, ফোন বা UID সঠিক কি چین চেক করুন।"); } 
+            } else { alert("❌ অ্যাকাউন্ট পাওয়া যায়নি! জিমেইল, ফোন বা UID সঠিক কি না চেক করুন।"); } 
             btn.innerText = "+ Add Balance"; btn.disabled = false; 
         });
 
