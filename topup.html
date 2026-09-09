@@ -204,7 +204,7 @@
             if(window.selectedPrice > 0 && window.isIdValid) { btn.disabled = false; } else { btn.disabled = true; }
         }
 
-        // 👇 আল্টিমেট ডিপ-স্ক্যান Name Check Logic 👇
+        // 👇 আপডেট করা আল্টিমেট নেম চেক লজিক 👇
         window.checkPlayerName = async function() {
             let uid = document.getElementById('playerUid').value.trim();
             if (!uid || !window.isIdValid) return alert("দয়া করে সঠিক Player ID দিন!");
@@ -218,29 +218,31 @@
             let gName = gameName.toLowerCase();
             let apis = [];
 
+            // আপডেট করা র্ওয়ার্কিং API লিস্ট
             if (gName.includes('pubg')) {
-                apis = [`https://api.isan.eu.org/nickname/pubg?id=${uid}`, `https://api.ryzendesu.vip/api/game/pubgmobile?id=${uid}`];
+                apis = [`https://api.ryzendesu.vip/api/game/pubgmobile?id=${uid}`];
             } else if (gName.includes('call of duty') || gName.includes('cod')) {
-                apis = [`https://api.isan.eu.org/nickname/codm?id=${uid}`, `https://api.ryzendesu.vip/api/game/codmobile?id=${uid}`];
+                apis = [`https://api.ryzendesu.vip/api/game/codmobile?id=${uid}`];
             } else {
-                // Free Fire এর জন্য ৫টি সেরা ওয়ার্কিং API
                 apis = [
-                    `https://api.isan.eu.org/nickname/ff?id=${uid}`,
-                    `https://mr-suroj-ff-api.vercel.app/ff?id=${uid}`,
                     `https://api.ryzendesu.vip/api/game/freefire?id=${uid}`,
-                    `https://freefire-api.vercel.app/api/ff?id=${uid}`,
-                    `https://ff-api-62.onrender.com/api/api.php?uid=${uid}`
+                    `https://mr-suroj-ff-api.vercel.app/ff?id=${uid}`,
+                    `https://freefire-api.vercel.app/api/ff?id=${uid}`
                 ];
             }
 
-            // নাম এক্সট্র্যাক্ট করার একটি স্মার্ট ফাংশন
+            // ডাটা এক্সট্র্যাক্ট করার আপডেটেড ফাংশন (API এর ডাটা স্ট্রাকচার অনুযায়ী)
             const extractName = (data) => {
-                if (!data || data.error || data.status === 404) return null;
-                let name = data.name || data.nickname || data.AccountName || data.Name || data.username || data.userName;
-                return (name && name !== "null" && name !== "undefined") ? name : null;
+                if (!data || data.error) return null;
+                if (data.nickname) return data.nickname;
+                if (data.name) return data.name;
+                if (data.userName) return data.userName;
+                if (data.AccountName) return data.AccountName;
+                if (data.data && data.data.userName) return data.data.userName; 
+                return null;
             };
 
-            // লেয়ার ১: ডাইরেক্ট ফেচ (ব্রাউজার ব্লক না করলে)
+            // লেয়ার ১: ডাইরেক্ট ফেচ
             for (let api of apis) {
                 try {
                     let response = await fetch(api);
@@ -249,45 +251,38 @@
                         playerName = extractName(data);
                         if (playerName) break;
                     }
-                } catch (e) {}
-            }
-
-            // লেয়ার ২: AllOrigins Raw বাইপাস (খুবই শক্তিশালী)
-            if (!playerName) {
-                for (let api of apis) {
-                    try {
-                        let response = await fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(api));
-                        if (response.ok) {
-                            let data = await response.json();
-                            playerName = extractName(data);
-                            if (playerName) break;
-                        }
-                    } catch (e) {}
+                } catch (e) {
+                    console.log("Direct fetch blocked by CORS for:", api);
                 }
             }
 
-            // লেয়ার ৩: CorsProxy বাইপাস
+            // লেয়ার ২: AllOrigins GET বাইপাস (Raw এর বদলে Get ব্যবহার করা হয়েছে ডাটা পার্স করার জন্য)
             if (!playerName) {
                 for (let api of apis) {
                     try {
-                        let response = await fetch("https://corsproxy.io/?" + encodeURIComponent(api));
+                        let proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(api)}`;
+                        let response = await fetch(proxyUrl);
                         if (response.ok) {
                             let data = await response.json();
-                            playerName = extractName(data);
+                            let parsedData = JSON.parse(data.contents); // AllOrigins এর কনটেন্ট পার্স করা হচ্ছে
+                            playerName = extractName(parsedData);
                             if (playerName) break;
                         }
-                    } catch (e) {}
+                    } catch (e) {
+                        console.log("Proxy fetch failed for:", api);
+                    }
                 }
             }
 
-            if (playerName) {
+            // রেজাল্ট শো করানো
+            if (playerName && playerName !== "null" && playerName !== "undefined") {
                 btn.innerHTML = `${playerName} <i class="fa-solid fa-circle-check"></i>`;
                 btn.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
                 btn.style.borderColor = '#10b981';
                 btn.style.color = '#10b981';
                 document.getElementById('playerName').value = playerName; 
             } else {
-                btn.innerHTML = 'নাম পাওয়া যায়নি! সার্ভার বিজি';
+                btn.innerHTML = 'নাম পাওয়া যায়নি! সার্ভার বিজি বা আইডি ভুল';
                 setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 3000);
             }
         }
