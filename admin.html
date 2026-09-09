@@ -82,10 +82,14 @@
     <div class="admin-tabs">
         <button class="tab-btn active" id="btn-tab-dashboard" onclick="openTab('tab-dashboard', this)"><i class="fa-solid fa-chart-pie"></i> Dashboard</button>
         <button class="tab-btn" id="btn-tab-orders" onclick="openTab('tab-orders', this)">
-            <i class="fa-solid fa-list-check"></i> Orders & Requests 
+            <i class="fa-solid fa-gamepad"></i> Orders 
             <span id="order-tab-badge" class="tab-badge" style="display: none;">0</span>
         </button>
-        <button class="tab-btn" id="btn-tab-content" onclick="openTab('tab-content', this)"><i class="fa-solid fa-gamepad"></i> App Content</button>
+        <button class="tab-btn" id="btn-tab-addmoney" onclick="openTab('tab-addmoney', this)">
+            <i class="fa-solid fa-money-bill-transfer"></i> Add Money 
+            <span id="addmoney-tab-badge" class="tab-badge" style="display: none;">0</span>
+        </button>
+        <button class="tab-btn" id="btn-tab-content" onclick="openTab('tab-content', this)"><i class="fa-solid fa-layer-group"></i> App Content</button>
         <button class="tab-btn" id="btn-tab-settings" onclick="openTab('tab-settings', this)"><i class="fa-solid fa-gear"></i> Settings</button>
     </div>
 
@@ -93,7 +97,7 @@
     <div id="tab-dashboard" class="tab-content active">
         <div class="stats-grid">
             <div class="stat-card"><div class="stat-icon" style="color: #3b82f6; background: rgba(59, 130, 246, 0.1);"><i class="fa-solid fa-cart-shopping"></i></div><div class="stat-info"><h3 id="stat-total-orders">0</h3><p>Total Orders</p></div></div>
-            <div class="stat-card"><div class="stat-icon" style="color: #f59e0b; background: rgba(249, 115, 11, 0.1);"><i class="fa-solid fa-clock"></i></div><div class="stat-info"><h3 id="stat-pending">0</h3><p>Pending</p></div></div>
+            <div class="stat-card"><div class="stat-icon" style="color: #f59e0b; background: rgba(249, 115, 11, 0.1);"><i class="fa-solid fa-clock"></i></div><div class="stat-info"><h3 id="stat-pending">0</h3><p>Pending Orders</p></div></div>
             <div class="stat-card" style="grid-column: span 2;"><div class="stat-icon" style="color: #10b981; background: rgba(16, 185, 129, 0.1);"><i class="fa-solid fa-wallet"></i></div><div class="stat-info"><b id="stat-revenue">৳ 0</b><p>Total Revenue</p></div></div>
         </div>
         
@@ -109,16 +113,20 @@
     <!-- TAB 2: ORDERS -->
     <div id="tab-orders" class="tab-content">
         <div class="admin-section">
-            <h3 class="section-title"><i class="fa-solid fa-money-bill-transfer" style="color: #f59e0b;"></i> Add Money Requests</h3>
-            <div id="add-money-list" style="max-height: 400px; overflow-y: auto; padding-right: 5px;"><div class="empty-msg">Loading requests...</div></div>
-        </div>
-        <div class="admin-section">
             <h3 class="section-title"><i class="fa-solid fa-gamepad" style="color: #ef4444;"></i> Recent Game Orders</h3>
-            <div id="game-order-list" style="max-height: 400px; overflow-y: auto; padding-right: 5px;"><div class="empty-msg">Loading orders...</div></div>
+            <div id="game-order-list" style="max-height: 500px; overflow-y: auto; padding-right: 5px;"><div class="empty-msg">Loading orders...</div></div>
         </div>
     </div>
 
-    <!-- TAB 3: APP CONTENT -->
+    <!-- TAB 3: ADD MONEY -->
+    <div id="tab-addmoney" class="tab-content">
+        <div class="admin-section">
+            <h3 class="section-title"><i class="fa-solid fa-money-bill-transfer" style="color: #f59e0b;"></i> Add Money Requests</h3>
+            <div id="add-money-list" style="max-height: 500px; overflow-y: auto; padding-right: 5px;"><div class="empty-msg">Loading requests...</div></div>
+        </div>
+    </div>
+
+    <!-- TAB 4: APP CONTENT -->
     <div id="tab-content" class="tab-content">
         <div class="admin-section">
             <h3 class="section-title"><i class="fa-solid fa-layer-group" style="color: #f59e0b;"></i> 1. Homepage Games</h3>
@@ -166,7 +174,7 @@
         </div>
     </div>
 
-    <!-- TAB 4: SETTINGS -->
+    <!-- TAB 5: SETTINGS -->
     <div id="tab-settings" class="tab-content">
         
         <div class="admin-section" style="border-color: #3b82f6; background-color: rgba(59, 130, 246, 0.05);">
@@ -178,7 +186,7 @@
 
         <div class="admin-section" style="border-color: #f59e0b; background-color: rgba(245, 158, 11, 0.05);">
             <h3 class="section-title" style="color: #f59e0b; border-bottom-color: rgba(245, 158, 11, 0.2);"><i class="fa-solid fa-person-digging"></i> Maintenance Mode</h3>
-            <p style="font-size: 11px; color: #94a3b8; margin-top:-5px; margin-bottom: 12px;">এটি অন করলে ইউজাররা অ্যাপে ঢুকতে বা কোনো কাজ করতে পারবে্বা না।</p>
+            <p style="font-size: 11px; color: #94a3b8; margin-top:-5px; margin-bottom: 12px;">এটি অন করলে ইউজাররা অ্যাপে ঢুকতে বা কোনো কাজ করতে পারবে না।</p>
             <input type="text" id="admin-maintenance-msg" class="input-dark" placeholder="Message: e.g. সার্ভার আপডেট চলছে...">
             <div style="display: flex; gap: 10px; margin-top: 10px;">
                 <button onclick="window.toggleMaintenance(true)" class="submit-btn" style="background-color: #f59e0b; color: white;"><i class="fa-solid fa-lock"></i> Turn ON</button>
@@ -211,8 +219,8 @@
         
         <div class="admin-section" style="border-color: #ef4444; background-color: rgba(239, 68, 68, 0.05);">
             <h3 class="section-title" style="color: #ef4444; border-bottom-color: rgba(239, 68, 68, 0.2);"><i class="fa-solid fa-triangle-exclamation"></i> Danger Zone</h3>
-            <p style="font-size: 11px; color: #94a3b8; margin-top:-5px; margin-bottom: 12px;">সতর্কতা: এটি চাপলে সমস্ত অর্ডার মুছে যাবে।</p>
-            <button onclick="window.resetAllData()" class="submit-btn" style="background-color: #ef4444;"><i class="fa-solid fa-trash"></i> Clear All Records</button>
+            <p style="font-size: 11px; color: #94a3b8; margin-top:-5px; margin-bottom: 12px;">সতর্কতা: এটি চাপলে সমস্ত 'গেম অর্ডার' মুছে যাবে (অ্যাড মানি হিস্টোরি আজীবন সুরক্ষিত থাকবে)।</p>
+            <button onclick="window.resetAllData()" class="submit-btn" style="background-color: #ef4444;"><i class="fa-solid fa-trash"></i> Clear Game Orders</button>
         </div>
     </div>
 
@@ -230,8 +238,10 @@
         let touchStartY = 0;
         let pullStartY = 0;
         const spinner = document.getElementById('refresh-spinner');
-        const tabIds = ['tab-dashboard', 'tab-orders', 'tab-content', 'tab-settings']; 
-        const btnIds = ['btn-tab-dashboard', 'btn-tab-orders', 'btn-tab-content', 'btn-tab-settings'];
+        
+        // Updated Tab Arrays for Swipe Logic
+        const tabIds = ['tab-dashboard', 'tab-orders', 'tab-addmoney', 'tab-content', 'tab-settings']; 
+        const btnIds = ['btn-tab-dashboard', 'btn-tab-orders', 'btn-tab-addmoney', 'btn-tab-content', 'btn-tab-settings'];
         
         document.getElementById('body-swipe').addEventListener('touchstart', e => { 
             touchStartX = e.changedTouches[0].screenX; 
@@ -250,11 +260,9 @@
         }, {passive: true});
 
         document.getElementById('body-swipe').addEventListener('touchend', e => {
-            // Horizontal Tab Switching Logic
             let diffX = touchStartX - e.changedTouches[0].screenX;
             let diffY = Math.abs(touchStartY - e.changedTouches[0].screenY);
             
-            // নিচের দিকে টানার সময় যাতে ট্যাব পাল্টে না যায় তার জন্য diffY < 50 অ্যাড করা হয়েছে
             if (Math.abs(diffX) > 70 && diffY < 50) {
                 let currentIndex = tabIds.findIndex(id => document.getElementById(id).classList.contains('active'));
                 if (diffX > 0 && currentIndex < tabIds.length - 1) { 
@@ -267,7 +275,6 @@
                 }
             }
 
-            // Pull to Refresh Logic
             if (spinner.style.top === '20px') {
                 spinner.innerHTML = `<i class="fa-solid fa-rotate fa-spin"></i> রিলোড হচ্ছে...`;
                 setTimeout(() => { window.location.reload(); }, 500);
@@ -349,13 +356,20 @@
         let pendingRequestsCount = 0;
 
         function updateTabBadge() {
-            let totalPending = pendingOrdersCount + pendingRequestsCount;
-            let badge = document.getElementById('order-tab-badge');
-            if (totalPending > 0) {
-                badge.innerText = totalPending;
-                badge.style.display = 'inline-block';
-            } else {
-                badge.style.display = 'none';
+            let orderBadge = document.getElementById('order-tab-badge');
+            if (pendingOrdersCount > 0) { 
+                orderBadge.innerText = pendingOrdersCount; 
+                orderBadge.style.display = 'inline-block'; 
+            } else { 
+                orderBadge.style.display = 'none'; 
+            }
+
+            let addMoneyBadge = document.getElementById('addmoney-tab-badge');
+            if (pendingRequestsCount > 0) { 
+                addMoneyBadge.innerText = pendingRequestsCount; 
+                addMoneyBadge.style.display = 'inline-block'; 
+            } else { 
+                addMoneyBadge.style.display = 'none'; 
             }
         }
 
@@ -538,7 +552,21 @@
 
         window.deleteItem = async (path, key) => { if(confirm("Are you sure you want to delete this?")) await remove(ref(db, `${path}/${key}`)); }
         window.approveMoney = async (reqId, uid, amount) => { if(confirm(`Approve adding ৳${amount}?`)) { await update(ref(db, `add_money_requests/${reqId}`), { status: 'Completed' }); const snap = await get(ref(db, `users/${uid}`)); let currentBal = (snap.exists() && snap.val().balance) ? Number(snap.val().balance) : 0; await update(ref(db, `users/${uid}`), { balance: currentBal + Number(amount) }); alert("Successfully added balance!"); } }
-        window.resetAllData = async () => { if(confirm("সতর্কতা! সমস্ত রেকর্ড মুছে ফেলতে চান?")) { try { await remove(ref(db, 'orders')); await remove(ref(db, 'add_money_requests')); alert("রেকর্ড মুছে ফেলা হয়েছে!"); document.getElementById('stat-total-orders').innerText = "0"; document.getElementById('stat-pending').innerText = "0"; document.getElementById('stat-revenue').innerText = "৳ 0"; } catch (e) { alert("Error: " + e.message); } } };
+        
+        // 👇 আপডেটেড রিসেট ডাটা ফাংশন (যেখানে অ্যাড মানি সুরক্ষিত আছে) 👇
+        window.resetAllData = async () => { 
+            if(confirm("সতর্কতা! শুধুমাত্র সমস্ত গেম অর্ডার মুছে ফেলতে চান? (অ্যাড মানি হিস্টোরি ডিলিট হবে না)")) { 
+                try { 
+                    await remove(ref(db, 'orders')); // শুধু গেম অর্ডার ডিলিট হবে
+                    alert("গেম অর্ডারের সমস্ত রেকর্ড মুছে ফেলা হয়েছে! অ্যাড মানি হিস্টোরি সুরক্ষিত আছে।"); 
+                    document.getElementById('stat-total-orders').innerText = "0"; 
+                    document.getElementById('stat-pending').innerText = "0"; 
+                    document.getElementById('stat-revenue').innerText = "৳ 0"; 
+                } catch (e) { 
+                    alert("Error: " + e.message); 
+                } 
+            } 
+        };
 
         document.getElementById('direct-add-btn').addEventListener('click', async () => { 
             let searchVal = document.getElementById('user-email').value.trim(); 
@@ -562,7 +590,7 @@
                 let currentBal = snap.exists() ? Number(snap.val()) : 0; await set(balRef, currentBal + amount); 
                 alert(`✅ সাফল্য! অ্যাকাউন্টে ৳${amount} অ্যাড করা হয়েছে।`); 
                 document.getElementById('user-email').value = ""; document.getElementById('add-amount').value = ""; 
-            } else { alert("❌ অ্যাকাউন্ট পাওয়া যায়নি! জিমেইল, ফোন বা UID সঠিক কি না চেক করুন।"); } 
+            } else { alert("❌ অ্যাকাউন্ট পাওয়া যায়নি! জিমেইল, ফোন বা UID সঠিক কি چین চেক করুন।"); } 
             btn.innerText = "+ Add Balance"; btn.disabled = false; 
         });
 
