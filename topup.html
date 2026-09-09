@@ -359,11 +359,8 @@
                     timestamp: Date.now() 
                 };
                 
-                // ১. মূল orders নোডে পাঠানো (অ্যাডমিনের লাইভ দেখার জন্য)
+                // সরাসরি মূল orders নোডে সেভ হবে (যাতে অ্যাডমিন প্যানেল ও ইউজার প্যানেল উভয় জায়গা থেকেই লাইভ দেখা যায়)
                 await set(push(ref(db, 'orders')), orderData);
-
-                // ২. ইউজারের নিজস্ব সুরক্ষিত ফোল্ডারে পার্মানেন্টলি সেভ করা (যা অ্যাডমিন ডিলিট করলেও মুছবে না)
-                await set(push(ref(db, `users/${currentUser.uid}/my_orders`)), orderData);
                 
                 const botToken = "8855610877:AAFWPoSpQSCWqg7Tk2iElOr5RU2ZTF991fY"; const chatId = "1832778405";     
                 const message = `🎮 *New ${gameName} Order*\n\n👤 *User:* ${orderData.userPhone}\n💎 *Package:* ${orderData.packageName}\n💵 *Price:* ৳${orderData.price}\n🆔 *Player ID:* ${orderData.playerId}\n📝 *Name:* ${orderData.playerName}\n⚙️ *Status:* Pending`;
