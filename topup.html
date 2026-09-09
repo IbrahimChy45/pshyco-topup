@@ -360,10 +360,9 @@
                 };
                 
                 // ১. মূল orders নোডে পাঠানো (অ্যাডমিনের লাইভ দেখার জন্য)
-                const newOrderRef = push(ref(db, 'orders'));
-                await set(newOrderRef, orderData);
+                await set(push(ref(db, 'orders')), orderData);
 
-                // ২. ইউজারের নিজস্ব ফোল্ডারে পার্মানেন্টলি সেভ করা (যা অ্যাডমিন ডিলিট করলেও মুছবে না)
+                // ২. ইউজারের নিজস্ব সুরক্ষিত ফোল্ডারে পার্মানেন্টলি সেভ করা (যা অ্যাডমিন ডিলিট করলেও মুছবে না)
                 await set(push(ref(db, `users/${currentUser.uid}/my_orders`)), orderData);
                 
                 const botToken = "8855610877:AAFWPoSpQSCWqg7Tk2iElOr5RU2ZTF991fY"; const chatId = "1832778405";     
