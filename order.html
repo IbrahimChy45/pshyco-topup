@@ -161,7 +161,7 @@
         </div>
     </nav>
 
-    <!-- 👇 Firebase Script for Fetching Secure Personal Orders 👇 -->
+    <!-- 👇 Firebase Script for Fetching Orders Live from Main Node 👇 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -181,7 +181,7 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // ইউজার লগইন আছে কি না চেক করে তার নিজস্ব ফোল্ডার থেকে ডাটা লোড করা
+        // ইউজার লগইন আছে কি না চেক করা
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 fetchMyOrders(user.uid);
@@ -190,16 +190,20 @@
             }
         });
 
-        // ইউজারের নিজস্ব ফোল্ডার (`users/{uid}/my_orders`) থেকে অর্ডার লোড করার ফাংশন
+        // মূল orders টেবিল থেকে ইউজারের অর্ডারগুলো ফিল্টার করে লোড করার ফাংশন
         function fetchMyOrders(uid) {
             const orderContainer = document.getElementById('order-list');
-            const myOrdersRef = ref(db, `users/${uid}/my_orders`);
+            const ordersRef = ref(db, 'orders');
 
-            onValue(myOrdersRef, (snapshot) => {
+            onValue(ordersRef, (snapshot) => {
                 let userOrders = [];
                 
                 snapshot.forEach((childSnapshot) => {
-                    userOrders.push(childSnapshot.val());
+                    let orderData = childSnapshot.val();
+                    // শুধুমাত্র বর্তমান ইউজারের অর্ডারগুলো আলাদা করা হচ্ছে
+                    if (orderData.uid === uid) {
+                        userOrders.push(orderData);
+                    }
                 });
 
                 // যদি কোনো অর্ডার না থাকে
