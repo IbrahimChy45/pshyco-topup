@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Hot Offer Checkout</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background-color: #0b0f19; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding-bottom: 80px; animation: pageLoad 0.4s ease-out forwards; }
+        body { background-color: #0b0f19; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding-bottom: 80px; animation: pageLoad 0.4s ease-out forwards; overflow-x: hidden; }
         @keyframes pageLoad { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
         .nav-item:active, .submit-btn:active, .back-btn:active, .check-name-btn:active { transform: scale(0.92) !important; transition: transform 0.1s ease !important; }
         
@@ -51,9 +51,16 @@
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: #151b29; border-top: 1px solid #2a3449; display: flex; justify-content: space-around; padding: 12px 0; z-index: 99; }
         .nav-item { text-align: center; color: #94a3b8; cursor: pointer; font-size: 12px; }
         .nav-item i { font-size: 20px; display: block; margin-bottom: 4px; }
+
+        /* Pull to Refresh Spinner Style */
+        #refresh-spinner { position: fixed; top: -50px; left: 50%; transform: translateX(-50%); background-color: #1e293b; color: #ef4444; padding: 8px 16px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 99999; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 8px; border: 1px solid #334155; transition: top 0.3s ease; }
     </style>
 </head>
-<body>
+<body id="body-swipe">
+
+    <!-- Pull to Refresh Indicator -->
+    <div id="refresh-spinner"><i class="fa-solid fa-rotate fa-spin"></i> রিফ্রেশ হচ্ছে...</div>
+
     <div class="premium-header">
         <div class="back-btn" onclick="window.location.href='index.html'"><i class="fa-solid fa-chevron-left"></i></div>
         <h2 class="title"><i class="fa-solid fa-fire" style="color: #ef4444;"></i> HOT <span>OFFER</span></h2>
@@ -95,6 +102,36 @@
         <div class="nav-item" onclick="window.location.href='addmoney.html'"><i class="fa-solid fa-wallet"></i><span>Add Money</span></div>
         <div class="nav-item" onclick="window.location.href='support.html'"><i class="fa-solid fa-headset"></i><span>Support</span></div>
     </nav>
+
+    <!-- Pull to Refresh Touch Logic -->
+    <script>
+        let pullStartY = 0;
+        const spinner = document.getElementById('refresh-spinner');
+
+        document.getElementById('body-swipe').addEventListener('touchstart', e => { 
+            if (window.scrollY === 0) { pullStartY = e.touches[0].clientY; }
+        }, {passive: true});
+
+        document.getElementById('body-swipe').addEventListener('touchmove', e => {
+            if (window.scrollY === 0 && pullStartY > 0) {
+                let currentY = e.touches[0].clientY;
+                let diffY = currentY - pullStartY;
+                if (diffY > 70 && diffY < 150) { 
+                    spinner.style.top = '20px'; 
+                }
+            }
+        }, {passive: true});
+
+        document.getElementById('body-swipe').addEventListener('touchend', e => {
+            if (spinner.style.top === '20px') {
+                spinner.innerHTML = `<i class="fa-solid fa-rotate fa-spin"></i> রিফ্রেশ হচ্ছে...`;
+                setTimeout(() => { window.location.reload(); }, 500);
+            } else { 
+                spinner.style.top = '-50px'; 
+                pullStartY = 0;
+            }
+        });
+    </script>
 
     <script>
         // URL থেকে অফারের ডিটেইলস কালেক্ট করা
