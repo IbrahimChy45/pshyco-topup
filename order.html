@@ -161,7 +161,7 @@
         </div>
     </nav>
 
-    <!-- 👇 Firebase Script for Fetching Orders 👇 -->
+    <!-- 👇 Firebase Script for Fetching Secure Personal Orders 👇 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -170,10 +170,7 @@
         const firebaseConfig = {
           apiKey: "AIzaSyD2d_najqnMXstfTvjlR6_4kffh5axIasY",
           authDomain: "pshyco-top-up-center.firebaseapp.com",
-          
-          // 👇 আপনার আসল লিংকটি এখানে বসান 👇
           databaseURL: "https://pshyco-top-up-center-default-rtdb.asia-southeast1.firebasedatabase.app/", 
-          
           projectId: "pshyco-top-up-center",
           storageBucket: "pshyco-top-up-center.firebasestorage.app",
           messagingSenderId: "454109876822",
@@ -184,7 +181,7 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // ইউজার লগইন আছে কি না চেক করা
+        // ইউজার লগইন আছে কি না চেক করে তার নিজস্ব ফোল্ডার থেকে ডাটা লোড করা
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 fetchMyOrders(user.uid);
@@ -193,20 +190,16 @@
             }
         });
 
-        // ডাটাবেজ থেকে অর্ডার লোড করার ফাংশন
+        // ইউজারের নিজস্ব ফোল্ডার (`users/{uid}/my_orders`) থেকে অর্ডার লোড করার ফাংশন
         function fetchMyOrders(uid) {
             const orderContainer = document.getElementById('order-list');
-            const ordersRef = ref(db, 'orders');
+            const myOrdersRef = ref(db, `users/${uid}/my_orders`);
 
-            onValue(ordersRef, (snapshot) => {
+            onValue(myOrdersRef, (snapshot) => {
                 let userOrders = [];
                 
-                // সব অর্ডার চেক করে শুধু এই ইউজারের অর্ডারগুলো আলাদা করা
                 snapshot.forEach((childSnapshot) => {
-                    let orderData = childSnapshot.val();
-                    if (orderData.uid === uid) {
-                        userOrders.push(orderData);
-                    }
+                    userOrders.push(childSnapshot.val());
                 });
 
                 // যদি কোনো অর্ডার না থাকে
@@ -224,11 +217,9 @@
                 let htmlContent = '';
 
                 userOrders.forEach((order) => {
-                    // তারিখ ঠিক করা
                     const dateObj = new Date(order.timestamp);
                     const formattedDate = dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
                     
-                    // স্ট্যাটাস অনুযায়ী কালার চেঞ্জ
                     let statusClass = 'status-pending';
                     if(order.status === 'Completed') statusClass = 'status-completed';
                     if(order.status === 'Cancelled') statusClass = 'status-cancelled';
