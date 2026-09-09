@@ -219,14 +219,13 @@
         
         <div class="admin-section" style="border-color: #ef4444; background-color: rgba(239, 68, 68, 0.05);">
             <h3 class="section-title" style="color: #ef4444; border-bottom-color: rgba(239, 68, 68, 0.2);"><i class="fa-solid fa-triangle-exclamation"></i> Danger Zone</h3>
-            <p style="font-size: 11px; color: #94a3b8; margin-top:-5px; margin-bottom: 12px;">সতর্কতা: এটি চাপলে সমস্ত 'গেম অর্ডার' মুছে যাবে (অ্যাড মানি হিস্টোরি আজীবন সুরক্ষিত থাকবে)।</p>
+            <p style="font-size: 11px; color: #94a3b8; margin-top:-5px; margin-bottom: 12px;">সতর্কতা: এটি চাপলে শুধুমাত্র অ্যাডমিন প্যানেলের গেম অর্ডার লিস্ট ক্লিয়ার হবে (ইউজারদের হিস্টোরি সুরক্ষিত থাকবে)।</p>
             <button onclick="window.resetAllData()" class="submit-btn" style="background-color: #ef4444;"><i class="fa-solid fa-trash"></i> Clear Game Orders</button>
         </div>
     </div>
 
     <!-- UI, Preloaded Audio & Pull to Refresh Script -->
     <script>
-        // গ্লোবাল প্রিলোডেড অডিও অবজেক্ট
         const adminAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2870/2870-preview.mp3');
         adminAudio.load();
 
@@ -237,7 +236,6 @@
             element.classList.add('active');
         }
 
-        // Horizontal Swipe + Vertical Pull to Refresh Logic
         let touchStartX = 0; 
         let touchStartY = 0;
         let pullStartY = 0;
@@ -287,7 +285,6 @@
             }
         });
 
-        // Persistent Sound State Logic
         let audioUnlocked = localStorage.getItem('admin_sound_enabled') === 'true';
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -592,10 +589,10 @@
         window.approveMoney = async (reqId, uid, amount) => { if(confirm(`Approve adding ৳${amount}?`)) { await update(ref(db, `add_money_requests/${reqId}`), { status: 'Completed' }); const snap = await get(ref(db, `users/${uid}`)); let currentBal = (snap.exists() && snap.val().balance) ? Number(snap.val().balance) : 0; await update(ref(db, `users/${uid}`), { balance: currentBal + Number(amount) }); alert("Successfully added balance!"); } }
         
         window.resetAllData = async () => { 
-            if(confirm("সতর্কতা! শুধুমাত্র সমস্ত গেম অর্ডার মুছে ফেলতে চান? (অ্যাড মানি হিস্টোরি ডিলিট হবে না)")) { 
+            if(confirm("সতর্কতা! শুধুমাত্র অ্যাডমিন প্যানেলের গেম অর্ডার লিস্ট ক্লিয়ার করতে চান? (ইউজারদের হিস্টোরি সুরক্ষিত থাকবে)")) { 
                 try { 
                     await remove(ref(db, 'orders')); 
-                    alert("গেম অর্ডারের সমস্ত রেকর্ড মুছে ফেলা হয়েছে! অ্যাড মানি হিস্টোরি সুরক্ষিত আছে।"); 
+                    alert("অ্যাডমিন প্যানেলের গেম অর্ডার লিস্ট ক্লিয়ার করা হয়েছে! ইউজারদের হিস্টোরি নিরাপদ আছে।"); 
                     document.getElementById('stat-total-orders').innerText = "0"; 
                     document.getElementById('stat-pending').innerText = "0"; 
                     document.getElementById('stat-revenue').innerText = "৳ 0"; 
