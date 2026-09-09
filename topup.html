@@ -204,7 +204,6 @@
             if(window.selectedPrice > 0 && window.isIdValid) { btn.disabled = false; } else { btn.disabled = true; }
         }
 
-        // 👇 আপডেট করা আল্টিমেট নেম চেক লজিক 👇
         window.checkPlayerName = async function() {
             let uid = document.getElementById('playerUid').value.trim();
             if (!uid || !window.isIdValid) return alert("দয়া করে সঠিক Player ID দিন!");
@@ -218,7 +217,6 @@
             let gName = gameName.toLowerCase();
             let apis = [];
 
-            // আপডেট করা র্ওয়ার্কিং API লিস্ট
             if (gName.includes('pubg')) {
                 apis = [`https://api.ryzendesu.vip/api/game/pubgmobile?id=${uid}`];
             } else if (gName.includes('call of duty') || gName.includes('cod')) {
@@ -231,7 +229,6 @@
                 ];
             }
 
-            // ডাটা এক্সট্র্যাক্ট করার আপডেটেড ফাংশন (API এর ডাটা স্ট্রাকচার অনুযায়ী)
             const extractName = (data) => {
                 if (!data || data.error) return null;
                 if (data.nickname) return data.nickname;
@@ -242,7 +239,6 @@
                 return null;
             };
 
-            // লেয়ার ১: ডাইরেক্ট ফেচ
             for (let api of apis) {
                 try {
                     let response = await fetch(api);
@@ -256,7 +252,6 @@
                 }
             }
 
-            // লেয়ার ২: AllOrigins GET বাইপাস (Raw এর বদলে Get ব্যবহার করা হয়েছে ডাটা পার্স করার জন্য)
             if (!playerName) {
                 for (let api of apis) {
                     try {
@@ -264,7 +259,7 @@
                         let response = await fetch(proxyUrl);
                         if (response.ok) {
                             let data = await response.json();
-                            let parsedData = JSON.parse(data.contents); // AllOrigins এর কনটেন্ট পার্স করা হচ্ছে
+                            let parsedData = JSON.parse(data.contents);
                             playerName = extractName(parsedData);
                             if (playerName) break;
                         }
@@ -274,7 +269,6 @@
                 }
             }
 
-            // রেজাল্ট শো করানো
             if (playerName && playerName !== "null" && playerName !== "undefined") {
                 btn.innerHTML = `${playerName} <i class="fa-solid fa-circle-check"></i>`;
                 btn.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
@@ -365,7 +359,12 @@
                     timestamp: Date.now() 
                 };
                 
-                await set(push(ref(db, 'orders')), orderData);
+                // ১. মূল orders নোডে পাঠানো (অ্যাডমিনের লাইভ দেখার জন্য)
+                const newOrderRef = push(ref(db, 'orders'));
+                await set(newOrderRef, orderData);
+
+                // ২. ইউজারের নিজস্ব ফোল্ডারে পার্মানেন্টলি সেভ করা (যা অ্যাডমিন ডিলিট করলেও মুছবে না)
+                await set(push(ref(db, `users/${currentUser.uid}/my_orders`)), orderData);
                 
                 const botToken = "8855610877:AAFWPoSpQSCWqg7Tk2iElOr5RU2ZTF991fY"; const chatId = "1832778405";     
                 const message = `🎮 *New ${gameName} Order*\n\n👤 *User:* ${orderData.userPhone}\n💎 *Package:* ${orderData.packageName}\n💵 *Price:* ৳${orderData.price}\n🆔 *Player ID:* ${orderData.playerId}\n📝 *Name:* ${orderData.playerName}\n⚙️ *Status:* Pending`;
