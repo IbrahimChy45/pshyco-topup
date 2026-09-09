@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hot Offer Checkout</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0b0f19; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding-bottom: 80px; animation: pageLoad 0.4s ease-out forwards; }
+        @keyframes pageLoad { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+        .nav-item:active, .submit-btn:active, .back-btn:active, .check-name-btn:active { transform: scale(0.92) !important; transition: transform 0.1s ease !important; }
+        
+        .premium-header { display: flex; align-items: center; justify-content: center; padding: 20px; position: relative; background-color: #0b0f19; }
+        .premium-header .back-btn { position: absolute; left: 20px; font-size: 20px; color: #ffffff; cursor: pointer; }
+        .premium-header .title { font-size: 16px; font-weight: bold; letter-spacing: 1px; margin: 0; display: flex; align-items: center; gap: 5px; text-transform: uppercase; }
+        .premium-header .title span { color: #ef4444; }
+        .content-container { padding: 0 20px; }
+        .section-label { font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-top: 20px; margin-bottom: 8px; display: block; }
+        
+        /* Hot Offer Special Card */
+        .offer-card { background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(11, 15, 25, 0)); border: 1px solid #ef4444; border-radius: 12px; padding: 18px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.1); }
+        .offer-details h4 { margin: 0 0 5px 0; font-size: 12px; color: #cbd5e1; text-transform: uppercase; letter-spacing: 1px; }
+        .offer-details h2 { margin: 0; font-size: 20px; color: white; display: flex; align-items: center; gap: 8px; }
+        .offer-price { font-size: 24px; font-weight: bold; color: #ef4444; }
+
+        .input-box { position: relative; width: 100%; }
+        .input-box input { width: 100%; background-color: #151b29; border: 1px solid #2a3449; color: white; padding: 14px 15px; border-radius: 10px; box-sizing: border-box; font-size: 14px; outline: none; transition: 0.3s; }
+        .input-box input:focus { border-color: #ef4444; }
+        .input-box input.invalid { border-color: #ef4444 !important; background-color: rgba(239, 68, 68, 0.05); }
+        .error-msg { color: #ef4444; font-size: 11px; margin-top: 5px; display: none; font-weight: 600; }
+
+        .check-name-btn { width: 100%; background-color: #151b29; color: #cbd5e1; border: 1.5px solid #2a3449; padding: 14px; border-radius: 8px; font-size: 14px; font-weight: bold; margin-top: 10px; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .check-name-btn:hover { border-color: #ef4444; color: #ef4444; }
+        .check-name-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        .wallet-box { background-color: #151b29; border: 1px solid #3b82f6; border-radius: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .wallet-info h4 { margin: 0 0 4px 0; font-size: 14px; font-weight: normal; }
+        .wallet-info p { margin: 0; font-size: 13px; color: #94a3b8; }
+        .wallet-balance { font-size: 18px; font-weight: bold; color: #3b82f6; display: flex; align-items: center; gap: 8px;}
+        
+        .submit-btn { width: 100%; background-color: #ef4444; color: white; border: none; padding: 16px; border-radius: 10px; font-size: 14px; font-weight: bold; margin-top: 30px; cursor: pointer; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); transition: 0.3s;}
+        .submit-btn:disabled { background-color: #475569; cursor: not-allowed; box-shadow: none; }
+        .submit-btn:active:not(:disabled) { background-color: #b91c1c; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background-color: #1e293b; padding: 25px; border-radius: 15px; text-align: center; width: 80%; max-width: 300px; border: 1px solid #334155; }
+        .success-icon { font-size: 40px; color: #10b981; margin-bottom: 15px; }
+        .modal-content h3 { margin-top: 0; color: white; }
+        .modal-content p { color: #cbd5e1; font-size: 14px; margin-bottom: 20px; }
+        
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background-color: #151b29; border-top: 1px solid #2a3449; display: flex; justify-content: space-around; padding: 12px 0; z-index: 99; }
+        .nav-item { text-align: center; color: #94a3b8; cursor: pointer; font-size: 12px; }
+        .nav-item i { font-size: 20px; display: block; margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+    <div class="premium-header">
+        <div class="back-btn" onclick="window.location.href='index.html'"><i class="fa-solid fa-chevron-left"></i></div>
+        <h2 class="title"><i class="fa-solid fa-fire" style="color: #ef4444;"></i> HOT <span>OFFER</span></h2>
+    </div>
+    
+    <div class="content-container">
+        
+        <div class="offer-card">
+            <div class="offer-details">
+                <h4 id="display-game">Loading...</h4>
+                <h2 id="display-pkg">Loading... <i class="fa-solid fa-bolt" style="color:#ef4444; font-size:14px;"></i></h2>
+            </div>
+            <div class="offer-price" id="display-price">৳0</div>
+        </div>
+
+        <label class="section-label">Account Info (Player UID)</label>
+        <div class="input-box">
+            <input type="text" id="playerUid" placeholder="Enter Player ID" oninput="validatePlayerId()">
+            <div id="error-msg" class="error-msg">Invalid Player ID</div>
+            <button id="check-name-btn" class="check-name-btn" onclick="checkPlayerName()">আইডির নাম চেক করুন</button>
+        </div>
+        
+        <input type="hidden" id="playerName" value="">
+        
+        <label class="section-label" style="margin-top: 25px;">PAYMENT METHOD</label>
+        <div class="wallet-box">
+            <div class="wallet-info"><h4>My Wallet</h4><p>Available Balance</p></div>
+            <div class="wallet-balance"><i class="fa-solid fa-wallet"></i><span id="current-balance">লোড হচ্ছে...</span></div>
+        </div>
+        
+        <button id="submit-btn" class="submit-btn" disabled>Enter Player ID First</button>
+    </div>
+
+    <div class="modal" id="successModal"><div class="modal-content"><i class="fa-solid fa-circle-check success-icon"></i><h3>Order Successful!</h3><p>Your order has been placed.</p></div></div>
+    
+    <nav class="bottom-nav">
+        <div class="nav-item" onclick="window.location.href='index.html'"><i class="fa-solid fa-house"></i><span>Home</span></div>
+        <div class="nav-item" onclick="window.location.href='order.html'"><i class="fa-solid fa-clipboard-list"></i><span>Order</span></div>
+        <div class="nav-item" onclick="window.location.href='addmoney.html'"><i class="fa-solid fa-wallet"></i><span>Add Money</span></div>
+        <div class="nav-item" onclick="window.location.href='support.html'"><i class="fa-solid fa-headset"></i><span>Support</span></div>
+    </nav>
+
+    <script>
+        // URL থেকে অফারের ডিটেইলস কালেক্ট করা
+        const urlParams = new URLSearchParams(window.location.search);
+        const gameName = urlParams.get('game') || "Free Fire";
+        const pkgName = urlParams.get('pkg') || "Special Offer";
+        const priceStr = urlParams.get('price') || "0";
+        const offerPrice = parseInt(priceStr);
+
+        // UI তে ডেটা শো করানো
+        document.getElementById('display-game').innerText = gameName;
+        document.getElementById('display-pkg').innerText = pkgName;
+        document.getElementById('display-price').innerText = `৳${offerPrice}`;
+
+        window.isIdValid = false;
+
+        window.validatePlayerId = function() {
+            let uidInput = document.getElementById('playerUid');
+            let errorDiv = document.getElementById('error-msg');
+            let btnName = document.getElementById('check-name-btn');
+            let val = uidInput.value.trim();
+            let gName = gameName.toLowerCase();
+            let isValid = true;
+
+            if(btnName.innerText !== "আইডির নাম চেক করুন") {
+                btnName.innerHTML = "আইডির নাম চেক করুন";
+                btnName.disabled = false;
+                btnName.style = ''; 
+                document.getElementById('playerName').value = "";
+            }
+
+            if (val.length === 0) {
+                isValid = false;
+                errorDiv.style.display = 'none';
+                uidInput.classList.remove('invalid');
+            } else {
+                if (gName.includes('pubg')) { if (!/^\d{8,11}$/.test(val)) isValid = false; } 
+                else if (gName.includes('call of duty') || gName.includes('cod')) { if (val.length < 6 || val.length > 20) isValid = false; } 
+                else { if (!/^\d{5,12}$/.test(val)) isValid = false; }
+
+                if (!isValid) {
+                    uidInput.classList.add('invalid'); errorDiv.innerText = `Invalid Player ID`; errorDiv.style.display = 'block';
+                } else {
+                    uidInput.classList.remove('invalid'); errorDiv.style.display = 'none';
+                }
+            }
+
+            window.isIdValid = isValid;
+            let btn = document.getElementById('submit-btn');
+            if(window.isIdValid) { 
+                btn.disabled = false; 
+                btn.innerText = `PAY ৳${offerPrice} FROM WALLET`;
+            } else { 
+                btn.disabled = true; 
+                btn.innerText = "Enter Player ID First";
+            }
+        }
+
+        // আপডেটেড নেম চেক লজিক
+        window.checkPlayerName = async function() {
+            let uid = document.getElementById('playerUid').value.trim();
+            if (!uid || !window.isIdValid) return alert("দয়া করে সঠিক Player ID দিন!");
+            
+            let btn = document.getElementById('check-name-btn');
+            let originalText = "আইডির নাম চেক করুন";
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> খোঁজা হচ্ছে...';
+            btn.disabled = true;
+
+            let playerName = null;
+            let gName = gameName.toLowerCase();
+            let apis = [];
+
+            if (gName.includes('pubg')) { apis = [`https://api.ryzendesu.vip/api/game/pubgmobile?id=${uid}`]; } 
+            else if (gName.includes('call of duty') || gName.includes('cod')) { apis = [`https://api.ryzendesu.vip/api/game/codmobile?id=${uid}`]; } 
+            else { apis = [`https://api.ryzendesu.vip/api/game/freefire?id=${uid}`, `https://mr-suroj-ff-api.vercel.app/ff?id=${uid}`, `https://freefire-api.vercel.app/api/ff?id=${uid}`]; }
+
+            const extractName = (data) => {
+                if (!data || data.error) return null;
+                if (data.nickname) return data.nickname; if (data.name) return data.name;
+                if (data.userName) return data.userName; if (data.AccountName) return data.AccountName;
+                if (data.data && data.data.userName) return data.data.userName; return null;
+            };
+
+            for (let api of apis) {
+                try {
+                    let response = await fetch(api);
+                    if (response.ok) {
+                        let data = await response.json();
+                        playerName = extractName(data);
+                        if (playerName) break;
+                    }
+                } catch (e) { console.log("Direct fetch blocked for:", api); }
+            }
+
+            if (!playerName) {
+                for (let api of apis) {
+                    try {
+                        let proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(api)}`;
+                        let response = await fetch(proxyUrl);
+                        if (response.ok) {
+                            let data = await response.json();
+                            let parsedData = JSON.parse(data.contents);
+                            playerName = extractName(parsedData);
+                            if (playerName) break;
+                        }
+                    } catch (e) {}
+                }
+            }
+
+            if (playerName && playerName !== "null" && playerName !== "undefined") {
+                btn.innerHTML = `${playerName} <i class="fa-solid fa-circle-check"></i>`;
+                btn.style.backgroundColor = 'rgba(16, 185, 129, 0.1)'; btn.style.borderColor = '#10b981'; btn.style.color = '#10b981';
+                document.getElementById('playerName').value = playerName; 
+            } else {
+                btn.innerHTML = 'নাম পাওয়া যায়নি!';
+                setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 3000);
+            }
+        }
+    </script>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, onValue, push, set, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        
+        const firebaseConfig = { apiKey: "AIzaSyD2d_najqnMXstfTvjlR6_4kffh5axIasY", authDomain: "pshyco-top-up-center.firebaseapp.com", databaseURL: "https://pshyco-top-up-center-default-rtdb.asia-southeast1.firebasedatabase.app/", projectId: "pshyco-top-up-center", storageBucket: "pshyco-top-up-center.firebasestorage.app", messagingSenderId: "454109876822", appId: "1:454109876822:web:6141a2e77780f75051a1f7" };
+        const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getDatabase(app);
+        
+        let currentUser = null; let currentBalance = 0; let userEmail = "";
+        
+        onAuthStateChanged(auth, (user) => { 
+            if (user) { 
+                currentUser = user; userEmail = user.email || "Unknown"; 
+                onValue(ref(db, 'users/' + user.uid), (snapshot) => { 
+                    if (snapshot.exists() && snapshot.val().balance !== undefined) { 
+                        currentBalance = snapshot.val().balance; 
+                        document.getElementById("current-balance").innerText = currentBalance + "৳"; 
+                    } else { 
+                        currentBalance = 0; document.getElementById("current-balance").innerText = "0৳"; 
+                    } 
+                }); 
+            } else { window.location.href = "login.html"; } 
+        });
+        
+        document.getElementById("submit-btn").addEventListener("click", async () => {
+            if (!currentUser) return; 
+            let uid = document.getElementById("playerUid").value.trim(); 
+            let name = document.getElementById("playerName").value.trim();
+            
+            if (!window.isIdValid) return alert("Please enter a valid Player ID!"); 
+            if (uid === "") return alert("Please enter Player ID!"); 
+            if (offerPrice === 0 || document.getElementById('submit-btn').disabled) return;
+            
+            if (currentBalance < offerPrice) { alert("Insufficient balance! Please Add Money."); window.location.href = "addmoney.html"; return; }
+            let submitBtn = document.getElementById('submit-btn'); submitBtn.innerText = "Processing..."; submitBtn.disabled = true;
+            
+            try {
+                await update(ref(db, 'users/' + currentUser.uid), { balance: currentBalance - offerPrice });
+                
+                const orderData = { 
+                    uid: currentUser.uid, 
+                    userPhone: userEmail, 
+                    game: gameName, 
+                    packageName: "🔥 HOT OFFER: " + pkgName, 
+                    price: offerPrice, 
+                    playerId: uid, 
+                    playerName: name || "N/A", 
+                    status: "Pending", 
+                    timestamp: Date.now() 
+                };
+                
+                await set(push(ref(db, 'orders')), orderData);
+                
+                const message = `🎮 *New Hot Offer Order*\n\n👤 *User:* ${orderData.userPhone}\n💎 *Package:* ${orderData.packageName}\n💵 *Price:* ৳${orderData.price}\n🆔 *Player ID:* ${orderData.playerId}\n📝 *Name:* ${orderData.playerName}\n⚙️ *Status:* Pending`;
+
+                // Vercel Secure Telegram API
+                fetch("https://pshyco-topup-knvh.vercel.app/api/telegram", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: message })
+                }).catch(err => console.log("Secure Telegram API Error", err));
+                
+                document.getElementById('successModal').style.display = 'flex'; 
+                setTimeout(() => { window.location.href = "order.html"; }, 2000);
+            } catch (error) { 
+                alert("Error: " + error.message); 
+                submitBtn.innerText = `PAY ৳${offerPrice} FROM WALLET`; 
+                submitBtn.disabled = false; 
+            }
+        });
+    </script>
+</body>
+</html>
