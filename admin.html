@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Admin Dashboard - Pshyco</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Mobile Friendly Drag and Drop Library -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    
     <style>
         body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0b0f19; color: white; padding-bottom: 30px; overflow-x: hidden; }
         .admin-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background-color: #1e293b; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid #334155; }
@@ -54,6 +58,13 @@
         .user-card div { display: flex; flex-direction: column; gap: 3px; }
         .user-card b { font-size: 14px; color: white; }
         .user-card span { font-size: 11px; color: #94a3b8; }
+
+        /* Package Card & Drag Styles */
+        .pkg-item { background: #151b29; padding: 12px; border: 1px solid #2a3449; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; transition: background 0.2s; }
+        .pkg-item.dragging { background: rgba(59, 130, 246, 0.2); border: 1px dashed #3b82f6; opacity: 0.9; transform: scale(1.02); }
+        .drag-handle { cursor: grab; padding: 10px 15px 10px 0; touch-action: none; }
+        .drag-handle:active { cursor: grabbing; }
+        .pkg-actions { display: flex; gap: 6px; }
 
         /* Pull to Refresh Spinner Style */
         #refresh-spinner { position: fixed; top: -50px; left: 50%; transform: translateX(-50%); background-color: #1e293b; color: #3b82f6; padding: 8px 16px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 99999; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 8px; border: 1px solid #334155; transition: top 0.3s ease; }
@@ -147,6 +158,7 @@
             <input type="text" id="new-pkg-type" class="input-dark" placeholder="Type (e.g. Diamond, UC)">
             <input type="number" id="new-pkg-price" class="input-dark" placeholder="Price (৳)">
             <button id="add-pkg-btn" class="submit-btn" style="background-color: #3b82f6; margin-bottom: 20px;">+ Add Package</button>
+            <p style="font-size: 11px; color: #94a3b8; margin: -10px 0 15px 0;">💡 টিপস: প্যাকেজের বাম পাশের <i class="fa-solid fa-grip-vertical"></i> আইকনে টিপে ধরে উপরে-নিচে সাজাতে পারেন।</p>
             <div id="dynamic-package-lists" style="max-height: 400px; overflow-y: auto;"><div class="empty-msg">Loading packages...</div></div>
         </div>
 
@@ -245,12 +257,17 @@
         const btnIds = ['btn-tab-dashboard', 'btn-tab-orders', 'btn-tab-addmoney', 'btn-tab-content', 'btn-tab-settings'];
         
         document.getElementById('body-swipe').addEventListener('touchstart', e => { 
+            // Avoid activating swipe to refresh if touching on package drag handle
+            if(e.target.closest('.drag-handle')) return; 
+            
             touchStartX = e.changedTouches[0].screenX; 
             touchStartY = e.changedTouches[0].screenY;
             if (window.scrollY === 0) { pullStartY = e.touches[0].clientY; }
         }, {passive: true});
 
         document.getElementById('body-swipe').addEventListener('touchmove', e => {
+            if(e.target.closest('.drag-handle')) return;
+
             if (window.scrollY === 0 && pullStartY > 0) {
                 let currentY = e.touches[0].clientY;
                 let diffY = currentY - pullStartY;
@@ -261,6 +278,8 @@
         }, {passive: true});
 
         document.getElementById('body-swipe').addEventListener('touchend', e => {
+            if(e.target.closest('.drag-handle')) return;
+
             let diffX = touchStartX - e.changedTouches[0].screenX;
             let diffY = Math.abs(touchStartY - e.changedTouches[0].screenY);
             
@@ -506,10 +525,71 @@
                         gameKeys.push({ key: dbKey, title: title });
                         catHtml += `<div style="background: #151b29; padding: 12px; border: 1px solid #2a3449; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;"><div style="display:flex; align-items:center; gap: 10px;"><img src="${cat.image}" style="width: 30px; height: 30px; border-radius:5px; object-fit:cover;"><div><b style="color: white; font-size: 13px;">${cat.title}</b><div style="color: #94a3b8; font-size: 10px;">${cat.link}</div></div></div><button onclick="window.deleteItem('homepage_categories', '${child.key}')" style="background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">Delete</button></div>`; 
                         selectHtml += `<option value="${dbKey}">🎮 ${title}</option>`;
-                        listsHtml += `<h4 style="color:#94a3b8; font-size:12px; border-bottom: 1px dashed #334155; padding-bottom: 5px; margin-top: 15px;">🔥 ${title} Packages</h4><div id="list-${dbKey}" style="display:grid; gap:10px; margin-bottom: 10px;"><div style="color: #64748b; font-size: 11px; font-style: italic;">Loading...</div></div>`;
+                        listsHtml += `<h4 style="color:#94a3b8; font-size:12px; border-bottom: 1px dashed #334155; padding-bottom: 5px; margin-top: 15px;">🔥 ${title} Packages</h4><div id="list-${dbKey}" style="display:grid; gap:10px; margin-bottom: 10px;"></div>`;
                     });
                     catContainer.innerHTML = catHtml; selectDropdown.innerHTML = selectHtml; listsContainer.innerHTML = listsHtml;
-                    gameKeys.forEach(game => { onValue(ref(db, game.key), (pkgSnap) => { let list = document.getElementById('list-' + game.key); if(!list) return; let pHtml = ''; if(pkgSnap.exists()) { pkgSnap.forEach(pChild => { let pkg = pChild.val(); pHtml += `<div style="background: #151b29; padding: 12px; border: 1px solid #2a3449; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;"><div><b style="color: white; font-size: 14px;">${pkg.diamond} ${pkg.name}</b><span style="color: #3b82f6; font-weight: bold; margin-left: 10px;">৳${pkg.price}</span></div><button onclick="window.deleteItem('${game.key}', '${pChild.key}')" style="background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">Delete</button></div>`; }); } else { pHtml = `<div style="color: #64748b; font-size: 11px; font-style: italic;">No packages found</div>`; } list.innerHTML = pHtml; }); });
+                    
+                    // 👇 Drag, Drop & Edit Logic 👇
+                    gameKeys.forEach(game => { 
+                        onValue(ref(db, game.key), (pkgSnap) => { 
+                            let list = document.getElementById('list-' + game.key); 
+                            if(!list) return; 
+                            let pHtml = ''; 
+                            if(pkgSnap.exists()) { 
+                                let pkgs = [];
+                                pkgSnap.forEach(pChild => {
+                                    pkgs.push({ id: pChild.key, ...pChild.val() });
+                                });
+                                
+                                // অর্ডারিং অনুযায়ী সর্ট করা
+                                pkgs.sort((a, b) => (a.order !== undefined ? a.order : 999) - (b.order !== undefined ? b.order : 999));
+
+                                pkgs.forEach(pkg => { 
+                                    pHtml += `
+                                    <div class="pkg-item" data-id="${pkg.id}">
+                                        <div style="display:flex; align-items:center;">
+                                            <div class="drag-handle">
+                                                <i class="fa-solid fa-grip-vertical" style="color: #64748b; font-size: 16px;"></i>
+                                            </div>
+                                            <div>
+                                                <b style="color: white; font-size: 14px;">${pkg.diamond} ${pkg.name}</b>
+                                                <span style="color: #3b82f6; font-weight: bold; margin-left: 10px;">৳${pkg.price}</span>
+                                            </div>
+                                        </div>
+                                        <div class="pkg-actions">
+                                            <button onclick="window.editPackage('${game.key}', '${pkg.id}', '${pkg.diamond}', '${pkg.name}', ${pkg.price})" style="background: #3b82f6; color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;"><i class="fa-solid fa-pen"></i></button>
+                                            <button onclick="window.deleteItem('${game.key}', '${pkg.id}')" style="background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;"><i class="fa-solid fa-trash"></i></button>
+                                        </div>
+                                    </div>`; 
+                                }); 
+                            } else { 
+                                pHtml = `<div style="color: #64748b; font-size: 11px; font-style: italic; padding: 5px;">No packages found</div>`; 
+                            } 
+                            list.innerHTML = pHtml; 
+                            
+                            // Initialize Mobile-friendly Drag and Drop
+                            if(pkgSnap.exists()) {
+                                new Sortable(list, {
+                                    handle: '.drag-handle',
+                                    animation: 150,
+                                    ghostClass: 'dragging',
+                                    delay: 150, // 0.15s press and hold to drag (perfect for mobile)
+                                    delayOnTouchOnly: true,
+                                    onEnd: async function (evt) {
+                                        let updates = {};
+                                        let items = list.querySelectorAll('.pkg-item');
+                                        items.forEach((el, index) => {
+                                            let id = el.getAttribute('data-id');
+                                            updates[`${game.key}/${id}/order`] = index;
+                                        });
+                                        try {
+                                            await update(ref(db), updates);
+                                        } catch(e) { console.error(e); }
+                                    }
+                                });
+                            }
+                        }); 
+                    });
                 } else { catContainer.innerHTML = '<div class="empty-msg">No games on Homepage!</div>'; selectDropdown.innerHTML = '<option value="">No games available</option>'; listsContainer.innerHTML = '<div class="empty-msg">Add a game first</div>'; }
             });
 
@@ -547,6 +627,32 @@
             onValue(ref(db, 'settings/payment_numbers'), (snapshot) => { if (snapshot.exists()) { const data = snapshot.val(); document.getElementById('admin-bkash').value = data.bkash || ""; document.getElementById('admin-nagad').value = data.nagad || ""; } });
             onValue(ref(db, 'settings/ui_settings'), (snapshot) => { if (snapshot.exists()) { const data = snapshot.val(); document.getElementById('admin-banner1').value = data.banner1 || ""; document.getElementById('admin-banner2').value = data.banner2 || ""; document.getElementById('admin-banner3').value = data.banner3 || ""; document.getElementById('admin-warning-img').value = data.warningImg || ""; document.getElementById('admin-warning-text').value = data.warningText || ""; } });
             onValue(ref(db, 'settings/support_info'), (snapshot) => { if (snapshot.exists()) { const data = snapshot.val(); document.getElementById('admin-whatsapp').value = data.whatsapp || ""; document.getElementById('admin-telegram').value = data.telegram || ""; } });
+        }
+
+        // 👇 Edit Package Function 👇
+        window.editPackage = async function(gameNode, pkgKey, oldDiamond, oldName, oldPrice) {
+            let newDiamond = prompt("ডায়মন্ড বা অ্যামাউন্ট পরিবর্তন করুন:", oldDiamond);
+            if(newDiamond === null) return;
+            let newName = prompt("প্যাকেজের নাম পরিবর্তন করুন (যেমন: Diamond, UC):", oldName);
+            if(newName === null) return;
+            let newPriceStr = prompt("মূল্য (৳) পরিবর্তন করুন:", oldPrice);
+            if(newPriceStr === null) return;
+            let newPrice = Number(newPriceStr);
+
+            if(!newDiamond || !newName || isNaN(newPrice) || newPrice <= 0) {
+                return alert("⚠️ ভুল তথ্য দিয়েছেন! দয়া করে সঠিক মান দিন।");
+            }
+
+            try {
+                await update(ref(db, `${gameNode}/${pkgKey}`), {
+                    diamond: newDiamond,
+                    name: newName,
+                    price: newPrice
+                });
+                alert("✅ প্যাকেজ সফলভাবে আপডেট করা হয়েছে!");
+            } catch (error) {
+                alert("Error: " + error.message);
+            }
         }
 
         window.toggleMaintenance = async (status) => {
@@ -588,7 +694,6 @@
         window.deleteItem = async (path, key) => { if(confirm("Are you sure you want to delete this?")) await remove(ref(db, `${path}/${key}`)); }
         window.approveMoney = async (reqId, uid, amount) => { if(confirm(`Approve adding ৳${amount}?`)) { await update(ref(db, `add_money_requests/${reqId}`), { status: 'Completed' }); const snap = await get(ref(db, `users/${uid}`)); let currentBal = (snap.exists() && snap.val().balance) ? Number(snap.val().balance) : 0; await update(ref(db, `users/${uid}`), { balance: currentBal + Number(amount) }); alert("Successfully added balance!"); } }
         
-        // 👇 সুরক্ষিত রিসেট ফাংশন (শুধুমাত্র অ্যাডমিনের গেম অর্ডার লিস্ট ক্লিয়ার করবে, ইউজারের ডেটা স্পর্শ করবে না) 👇
         window.resetAllData = async () => { 
             if(confirm("সতর্কতা! এটি চাপলে শুধুমাত্র অ্যাডমিন প্যানেলের লাইভ গেম অর্ডার লিস্ট ক্লিয়ার হবে। ইউজারদের পার্সোনাল পারচেস এবং অ্যাড মানি হিস্টোরি শতভাগ সুরক্ষিত থাকবে। আপনি কি নিশ্চিত?")) { 
                 try { 
@@ -629,7 +734,22 @@
             btn.innerText = "+ Add Balance"; btn.disabled = false; 
         });
 
-        document.getElementById('add-pkg-btn').addEventListener('click', async () => { let gameNode = document.getElementById('new-pkg-game').value; if(!gameNode) return alert("Please add a game first!"); let diamond = document.getElementById('new-pkg-diamond').value.trim(); let name = document.getElementById('new-pkg-type').value.trim(); let price = Number(document.getElementById('new-pkg-price').value); if(!diamond || !name || price <= 0) return alert("Fill all fields!"); let btn = document.getElementById('add-pkg-btn'); btn.innerText = "Adding..."; let keyName = diamond.replace(/\s+/g, '_').toLowerCase() + '_' + Date.now(); await set(ref(db, `${gameNode}/pkg_${keyName}`), { diamond, name, price }); alert("Package Added!"); document.getElementById('new-pkg-diamond').value = ""; document.getElementById('new-pkg-type').value = ""; document.getElementById('new-pkg-price').value = ""; btn.innerText = "+ Add Package"; });
+        document.getElementById('add-pkg-btn').addEventListener('click', async () => { 
+            let gameNode = document.getElementById('new-pkg-game').value; if(!gameNode) return alert("Please add a game first!"); 
+            let diamond = document.getElementById('new-pkg-diamond').value.trim(); 
+            let name = document.getElementById('new-pkg-type').value.trim(); 
+            let price = Number(document.getElementById('new-pkg-price').value); 
+            if(!diamond || !name || price <= 0) return alert("Fill all fields!"); 
+            let btn = document.getElementById('add-pkg-btn'); btn.innerText = "Adding..."; 
+            let keyName = diamond.replace(/\s+/g, '_').toLowerCase() + '_' + Date.now(); 
+            
+            // নতুন প্যাকেজটি যাতে সবার নিচে থাকে তাই ডিফল্টভাবে order: 999 সেট করে দেওয়া হলো
+            await set(ref(db, `${gameNode}/pkg_${keyName}`), { diamond, name, price, order: 999 }); 
+            alert("Package Added!"); 
+            document.getElementById('new-pkg-diamond').value = ""; document.getElementById('new-pkg-type').value = ""; document.getElementById('new-pkg-price').value = ""; 
+            btn.innerText = "+ Add Package"; 
+        });
+
         document.getElementById('add-cat-btn').addEventListener('click', async () => { let title = document.getElementById('cat-title').value.trim(); let subtitle = document.getElementById('cat-subtitle').value.trim(); let image = document.getElementById('cat-image').value.trim(); let link = document.getElementById('cat-link').value.trim(); if(!title || !image || !link) return alert("Fill all fields!"); await set(push(ref(db, 'homepage_categories')), { title, subtitle: subtitle || title, image, link }); alert("Game Added!"); document.getElementById('cat-title').value=""; document.getElementById('cat-subtitle').value=""; document.getElementById('cat-image').value=""; document.getElementById('cat-link').value=""; });
         document.getElementById('update-numbers-btn').addEventListener('click', async () => { let bkash = document.getElementById('admin-bkash').value.trim(); let nagad = document.getElementById('admin-nagad').value.trim(); await set(ref(db, 'settings/payment_numbers'), { bkash, nagad }); alert("Updated!"); });
         document.getElementById('update-ui-btn').addEventListener('click', async () => { let b1 = document.getElementById('admin-banner1').value.trim(); let b2 = document.getElementById('admin-banner2').value.trim(); let b3 = document.getElementById('admin-banner3').value.trim(); let wImg = document.getElementById('admin-warning-img').value.trim(); let wText = document.getElementById('admin-warning-text').value.trim(); await set(ref(db, 'settings/ui_settings'), { banner1: b1, banner2: b2, banner3: b3, warningImg: wImg, warningText: wText }); alert("Updated!"); });
