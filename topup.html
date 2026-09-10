@@ -328,6 +328,7 @@
         }
     </script>
     
+    <!-- 👇 এইখানে সর্টিং আপডেট করা হয়েছে 👇 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -355,12 +356,21 @@
             } 
         });
         
+        // অ্যাডমিন প্যানেলের সিরিয়াল অনুযায়ী প্যাকেজ লোড করার লজিক
         onValue(ref(db, dbNode), (snapshot) => {
             const container = document.getElementById('packages-container'); const submitBtn = document.getElementById('submit-btn');
             container.innerHTML = ''; let isFirst = true;
             if (snapshot.exists()) {
+                let pkgsArray = [];
                 snapshot.forEach(child => {
-                    const pkg = child.val(); const card = document.createElement('div'); card.className = `pkg-card ${isFirst ? 'selected' : ''}`; 
+                    pkgsArray.push(child.val());
+                });
+                
+                // অ্যাডমিন প্যানেলের সাজানো সিরিয়াল (order) অনুযায়ী সর্ট করা
+                pkgsArray.sort((a, b) => (a.order !== undefined ? a.order : 999) - (b.order !== undefined ? b.order : 999));
+
+                pkgsArray.forEach(pkg => {
+                    const card = document.createElement('div'); card.className = `pkg-card ${isFirst ? 'selected' : ''}`; 
                     card.onclick = function() { window.selectPackage(this, pkg.diamond, pkg.price, pkg.name); };
                     card.innerHTML = `<h3>${pkg.diamond}</h3><p>${pkg.name}</p><div class="price">৳${pkg.price}</div><div class="checkmark"><i class="fa-solid fa-check"></i></div>`;
                     container.appendChild(card);
