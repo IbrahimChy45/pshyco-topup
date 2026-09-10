@@ -257,7 +257,9 @@
         const btnIds = ['btn-tab-dashboard', 'btn-tab-orders', 'btn-tab-addmoney', 'btn-tab-content', 'btn-tab-settings'];
         
         document.getElementById('body-swipe').addEventListener('touchstart', e => { 
+            // Avoid activating swipe to refresh if touching on package drag handle
             if(e.target.closest('.drag-handle')) return; 
+            
             touchStartX = e.changedTouches[0].screenX; 
             touchStartY = e.changedTouches[0].screenY;
             if (window.scrollY === 0) { pullStartY = e.touches[0].clientY; }
@@ -265,6 +267,7 @@
 
         document.getElementById('body-swipe').addEventListener('touchmove', e => {
             if(e.target.closest('.drag-handle')) return;
+
             if (window.scrollY === 0 && pullStartY > 0) {
                 let currentY = e.touches[0].clientY;
                 let diffY = currentY - pullStartY;
@@ -630,27 +633,22 @@
             onValue(ref(db, 'settings/support_info'), (snapshot) => { if (snapshot.exists()) { const data = snapshot.val(); document.getElementById('admin-whatsapp').value = data.whatsapp || ""; document.getElementById('admin-telegram').value = data.telegram || ""; } });
         }
 
-        // 👇 Edit Package Function 👇
+        // 👇 Edit Package Function (Only Price) 👇
         window.editPackage = async function(gameNode, pkgKey, oldDiamond, oldName, oldPrice) {
-            let newDiamond = prompt("ডায়মন্ড বা অ্যামাউন্ট পরিবর্তন করুন:", oldDiamond);
-            if(newDiamond === null) return;
-            let newName = prompt("প্যাকেজের নাম পরিবর্তন করুন (যেমন: Diamond, UC):", oldName);
-            if(newName === null) return;
-            let newPriceStr = prompt("মূল্য (৳) পরিবর্তন করুন:", oldPrice);
+            let newPriceStr = prompt(`"${oldDiamond} ${oldName}" এর বর্তমান মূল্য ৳${oldPrice}\nনতুন মূল্য (৳) লিখুন:`, oldPrice);
             if(newPriceStr === null) return;
+            
             let newPrice = Number(newPriceStr);
 
-            if(!newDiamond || !newName || isNaN(newPrice) || newPrice <= 0) {
-                return alert("⚠️ ভুল তথ্য দিয়েছেন! দয়া করে সঠিক মান দিন।");
+            if(isNaN(newPrice) || newPrice <= 0) {
+                return alert("⚠️ ভুল তথ্য দিয়েছেন! দয়া করে সঠিক টাকার পরিমাণ দিন।");
             }
 
             try {
                 await update(ref(db, `${gameNode}/${pkgKey}`), {
-                    diamond: newDiamond,
-                    name: newName,
                     price: newPrice
                 });
-                alert("✅ প্যাকেজ সফলভাবে আপডেট করা হয়েছে!");
+                alert("✅ প্যাকেজের দাম সফলভাবে আপডেট করা হয়েছে!");
             } catch (error) {
                 alert("Error: " + error.message);
             }
@@ -731,7 +729,7 @@
                 let currentBal = snap.exists() ? Number(snap.val()) : 0; await set(balRef, currentBal + amount); 
                 alert(`✅ সাফল্য! অ্যাকাউন্টে ৳${amount} অ্যাড করা হয়েছে।`); 
                 document.getElementById('user-email').value = ""; document.getElementById('add-amount').value = ""; 
-            } else { alert("❌ অ্যাকাউন্ট পাওয়া যায়নি! জিমেইল, ফোন বা UID সঠিক কি না চেক করুন।"); } 
+            } else { alert("❌ অ্যাকাউন্ট পাওয়া যায়নি! জিমেইল, ফোন বা UID সঠিক কি চেক করুন।"); } 
             btn.innerText = "+ Add Balance"; btn.disabled = false; 
         });
 
