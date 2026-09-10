@@ -61,7 +61,7 @@
 
         /* Package Card & Drag Styles */
         .pkg-item { background: #151b29; padding: 12px; border: 1px solid #2a3449; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; transition: background 0.2s; }
-        .pkg-item.dragging { background: rgba(59, 130, 246, 0.2); border: 1px dashed #3b82f6; opacity: 0.9; transform: scale(1.02); }
+        .pkg-item.dragging { background: rgba(59, 130, 246, 0.2); border: 1px dashed #3b82f6; opacity: 0.9; transform: scale(1.02); z-index: 10; }
         .drag-handle { cursor: grab; padding: 10px 15px 10px 0; touch-action: none; }
         .drag-handle:active { cursor: grabbing; }
         .pkg-actions { display: flex; gap: 6px; }
@@ -257,9 +257,7 @@
         const btnIds = ['btn-tab-dashboard', 'btn-tab-orders', 'btn-tab-addmoney', 'btn-tab-content', 'btn-tab-settings'];
         
         document.getElementById('body-swipe').addEventListener('touchstart', e => { 
-            // Avoid activating swipe to refresh if touching on package drag handle
             if(e.target.closest('.drag-handle')) return; 
-            
             touchStartX = e.changedTouches[0].screenX; 
             touchStartY = e.changedTouches[0].screenY;
             if (window.scrollY === 0) { pullStartY = e.touches[0].clientY; }
@@ -267,7 +265,6 @@
 
         document.getElementById('body-swipe').addEventListener('touchmove', e => {
             if(e.target.closest('.drag-handle')) return;
-
             if (window.scrollY === 0 && pullStartY > 0) {
                 let currentY = e.touches[0].clientY;
                 let diffY = currentY - pullStartY;
@@ -529,7 +526,7 @@
                     });
                     catContainer.innerHTML = catHtml; selectDropdown.innerHTML = selectHtml; listsContainer.innerHTML = listsHtml;
                     
-                    // 👇 Drag, Drop & Edit Logic 👇
+                    // 👇 Drag, Drop & Edit Logic (Bug Fixed version) 👇
                     gameKeys.forEach(game => { 
                         onValue(ref(db, game.key), (pkgSnap) => { 
                             let list = document.getElementById('list-' + game.key); 
@@ -569,11 +566,15 @@
                             
                             // Initialize Mobile-friendly Drag and Drop
                             if(pkgSnap.exists()) {
-                                new Sortable(list, {
+                                // আগের কোনো ড্র্যাগিং সিস্টেম থাকলে সেটা ক্লিয়ার করে নতুন করে চালু করা
+                                if(window['sortable_' + game.key]) {
+                                    window['sortable_' + game.key].destroy();
+                                }
+                                window['sortable_' + game.key] = new Sortable(list, {
                                     handle: '.drag-handle',
                                     animation: 150,
                                     ghostClass: 'dragging',
-                                    delay: 150, // 0.15s press and hold to drag (perfect for mobile)
+                                    delay: 150, // 0.15s press and hold to drag
                                     delayOnTouchOnly: true,
                                     onEnd: async function (evt) {
                                         let updates = {};
@@ -743,7 +744,6 @@
             let btn = document.getElementById('add-pkg-btn'); btn.innerText = "Adding..."; 
             let keyName = diamond.replace(/\s+/g, '_').toLowerCase() + '_' + Date.now(); 
             
-            // নতুন প্যাকেজটি যাতে সবার নিচে থাকে তাই ডিফল্টভাবে order: 999 সেট করে দেওয়া হলো
             await set(ref(db, `${gameNode}/pkg_${keyName}`), { diamond, name, price, order: 999 }); 
             alert("Package Added!"); 
             document.getElementById('new-pkg-diamond').value = ""; document.getElementById('new-pkg-type').value = ""; document.getElementById('new-pkg-price').value = ""; 
