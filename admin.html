@@ -100,6 +100,10 @@
             <i class="fa-solid fa-money-bill-transfer"></i> Add Money 
             <span id="addmoney-tab-badge" class="tab-badge" style="display: none;">0</span>
         </button>
+        <!-- 👇 Users Tab Button 👇 -->
+        <button class="tab-btn" id="btn-tab-users" onclick="openTab('tab-users', this)">
+            <i class="fa-solid fa-users"></i> Users 
+        </button>
         <button class="tab-btn" id="btn-tab-content" onclick="openTab('tab-content', this)"><i class="fa-solid fa-layer-group"></i> App Content</button>
         <button class="tab-btn" id="btn-tab-settings" onclick="openTab('tab-settings', this)"><i class="fa-solid fa-gear"></i> Settings</button>
     </div>
@@ -137,7 +141,30 @@
         </div>
     </div>
 
-    <!-- TAB 4: APP CONTENT -->
+    <!-- 👇 TAB 4: USERS (New User Stats and Wallet Info) 👇 -->
+    <div id="tab-users" class="tab-content">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="color: #8b5cf6; background: rgba(139, 92, 246, 0.1);"><i class="fa-solid fa-users"></i></div>
+                <div class="stat-info"><h3 id="stat-users-count">0</h3><p>Total Users</p></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="color: #10b981; background: rgba(16, 185, 129, 0.1);"><i class="fa-solid fa-vault"></i></div>
+                <div class="stat-info"><b id="stat-users-balance" style="font-size:20px;">৳ 0</b><p>Total Reserve</p></div>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <h3 class="section-title"><i class="fa-solid fa-list-ul" style="color: #3b82f6;"></i> All Users Details</h3>
+            <p style="font-size: 11px; color: #94a3b8; margin-top:-5px; margin-bottom: 12px;">যেকোনো ইউজারের তথ্য বা ব্যালেন্স খুঁজতে সার্চ করুন।</p>
+            <input type="text" id="search-user" class="input-dark" placeholder="Search by Name, Email, Phone or UID..." onkeyup="searchUsers()">
+            <div id="admin-users-list" style="max-height: 450px; overflow-y: auto; padding-right: 5px; margin-top: 15px;">
+                <div class="empty-msg">Loading users...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 5: APP CONTENT -->
     <div id="tab-content" class="tab-content">
         <div class="admin-section">
             <h3 class="section-title"><i class="fa-solid fa-layer-group" style="color: #f59e0b;"></i> 1. Homepage Games</h3>
@@ -186,7 +213,7 @@
         </div>
     </div>
 
-    <!-- TAB 5: SETTINGS -->
+    <!-- TAB 6: SETTINGS -->
     <div id="tab-settings" class="tab-content">
         
         <div class="admin-section" style="border-color: #3b82f6; background-color: rgba(59, 130, 246, 0.05);">
@@ -253,13 +280,12 @@
         let pullStartY = 0;
         const spinner = document.getElementById('refresh-spinner');
         
-        const tabIds = ['tab-dashboard', 'tab-orders', 'tab-addmoney', 'tab-content', 'tab-settings']; 
-        const btnIds = ['btn-tab-dashboard', 'btn-tab-orders', 'btn-tab-addmoney', 'btn-tab-content', 'btn-tab-settings'];
+        // 👇 ট্যাব আইডির লিস্ট আপডেট করা হলো Users সহ 👇
+        const tabIds = ['tab-dashboard', 'tab-orders', 'tab-addmoney', 'tab-users', 'tab-content', 'tab-settings']; 
+        const btnIds = ['btn-tab-dashboard', 'btn-tab-orders', 'btn-tab-addmoney', 'btn-tab-users', 'btn-tab-content', 'btn-tab-settings'];
         
         document.getElementById('body-swipe').addEventListener('touchstart', e => { 
-            // Avoid activating swipe to refresh if touching on package drag handle
             if(e.target.closest('.drag-handle')) return; 
-            
             touchStartX = e.changedTouches[0].screenX; 
             touchStartY = e.changedTouches[0].screenY;
             if (window.scrollY === 0) { pullStartY = e.touches[0].clientY; }
@@ -303,6 +329,20 @@
                 pullStartY = 0;
             }
         });
+
+        // 👇 Search Users Logic 👇
+        window.searchUsers = function() {
+            let filter = document.getElementById('search-user').value.toLowerCase();
+            let items = document.querySelectorAll('.user-list-item');
+            items.forEach(item => {
+                let txt = item.getAttribute('data-search');
+                if (txt.includes(filter)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
 
         let audioUnlocked = localStorage.getItem('admin_sound_enabled') === 'true';
 
@@ -491,7 +531,72 @@
                 }
             };
 
-            onValue(ref(db, 'users'), (snap) => { if(snap.exists()) { usersData = snap.val(); if(ordersSnap) renderOrders(ordersSnap); if(requestsSnap) renderRequests(requestsSnap); } });
+            // 👇 Users Fetch Logic (Expanded to calculate Reserve, Total Users and Render Searchable List) 👇
+            onValue(ref(db, 'users'), (snap) => { 
+                if(snap.exists()) { 
+                    usersData = snap.val(); 
+                    
+                    let totalUsers = 0;
+                    let totalWalletBalance = 0;
+                    let usersHtml = '';
+                    let usersArray = [];
+
+                    snap.forEach(child => {
+                        let uData = child.val();
+                        uData.uid = child.key;
+                        usersArray.push(uData);
+                    });
+
+                    // Sort users by balance (highest first)
+                    usersArray.sort((a, b) => (b.balance || 0) - (a.balance || 0));
+
+                    usersArray.forEach(u => {
+                        totalUsers++;
+                        let bal = Number(u.balance) || 0;
+                        totalWalletBalance += bal;
+
+                        let uName = u.name || "Guest User"; 
+                        let uEmail = u.email || u.phone || "No Email/Phone Given"; 
+                        let uPic = u.profilePic || "https://via.placeholder.com/45/3b82f6/ffffff?text=U";
+
+                        // HTML for each user
+                        usersHtml += `
+                        <div class="user-list-item" data-search="${uName.toLowerCase()} ${uEmail.toLowerCase()} ${u.uid.toLowerCase()}" style="background: #151b29; padding: 12px; border: 1px solid #2a3449; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <div class="user-card" style="margin-bottom: 0; border: none; background: transparent; padding: 0; box-shadow: none;">
+                                <img src="${uPic}" alt="dp">
+                                <div>
+                                    <b style="color: white;">${uName}</b>
+                                    <span style="color: #94a3b8; font-size:11px;">${uEmail}</span>
+                                    <span style="font-size:9px; color:#64748b;">UID: ${u.uid}</span>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <b style="color: #10b981; font-size: 16px;">৳${bal}</b>
+                                <div style="font-size: 10px; color: #94a3b8;">Balance</div>
+                            </div>
+                        </div>`;
+                    });
+
+                    // Update DOM Stats
+                    document.getElementById('stat-users-count').innerText = totalUsers;
+                    document.getElementById('stat-users-balance').innerText = "৳ " + totalWalletBalance;
+                    
+                    // Render List
+                    let listContainer = document.getElementById('admin-users-list');
+                    if(listContainer) {
+                        listContainer.innerHTML = usersHtml || '<div class="empty-msg">No Users Found</div>';
+                    }
+
+                    if(ordersSnap) renderOrders(ordersSnap); 
+                    if(requestsSnap) renderRequests(requestsSnap); 
+                } else {
+                    let listContainer = document.getElementById('admin-users-list');
+                    if(listContainer) listContainer.innerHTML = '<div class="empty-msg">No Users Found</div>';
+                    document.getElementById('stat-users-count').innerText = 0;
+                    document.getElementById('stat-users-balance').innerText = "৳ 0";
+                }
+            });
+
             onValue(ref(db, 'orders'), (snap) => { ordersSnap = snap; renderOrders(snap); });
             onValue(ref(db, 'add_money_requests'), (snap) => { requestsSnap = snap; renderRequests(snap); });
 
@@ -529,7 +634,6 @@
                     });
                     catContainer.innerHTML = catHtml; selectDropdown.innerHTML = selectHtml; listsContainer.innerHTML = listsHtml;
                     
-                    // 👇 Drag, Drop & Edit Logic (Bug Fixed version) 👇
                     gameKeys.forEach(game => { 
                         onValue(ref(db, game.key), (pkgSnap) => { 
                             let list = document.getElementById('list-' + game.key); 
@@ -541,7 +645,6 @@
                                     pkgs.push({ id: pChild.key, ...pChild.val() });
                                 });
                                 
-                                // অর্ডারিং অনুযায়ী সর্ট করা
                                 pkgs.sort((a, b) => (a.order !== undefined ? a.order : 999) - (b.order !== undefined ? b.order : 999));
 
                                 pkgs.forEach(pkg => { 
@@ -567,9 +670,7 @@
                             } 
                             list.innerHTML = pHtml; 
                             
-                            // Initialize Mobile-friendly Drag and Drop
                             if(pkgSnap.exists()) {
-                                // আগের কোনো ড্র্যাগিং সিস্টেম থাকলে সেটা ক্লিয়ার করে নতুন করে চালু করা
                                 if(window['sortable_' + game.key]) {
                                     window['sortable_' + game.key].destroy();
                                 }
@@ -577,7 +678,7 @@
                                     handle: '.drag-handle',
                                     animation: 150,
                                     ghostClass: 'dragging',
-                                    delay: 150, // 0.15s press and hold to drag
+                                    delay: 150,
                                     delayOnTouchOnly: true,
                                     onEnd: async function (evt) {
                                         let updates = {};
@@ -633,7 +734,6 @@
             onValue(ref(db, 'settings/support_info'), (snapshot) => { if (snapshot.exists()) { const data = snapshot.val(); document.getElementById('admin-whatsapp').value = data.whatsapp || ""; document.getElementById('admin-telegram').value = data.telegram || ""; } });
         }
 
-        // 👇 Edit Package Function (Only Price) 👇
         window.editPackage = async function(gameNode, pkgKey, oldDiamond, oldName, oldPrice) {
             let newPriceStr = prompt(`"${oldDiamond} ${oldName}" এর বর্তমান মূল্য ৳${oldPrice}\nনতুন মূল্য (৳) লিখুন:`, oldPrice);
             if(newPriceStr === null) return;
